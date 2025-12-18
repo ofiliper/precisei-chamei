@@ -51,6 +51,20 @@ export class ServicesService extends HttpService {
         return request;
     };
 
+    async update(id_service: string, data: { image: any }) {
+        // return this.post<AnswerDTO>("/auth/signup", data);
+        const request = await fnFetch({
+            url: `${this.defaultUrl}/${id_service}`,
+            method: 'PUT',
+            body: data,
+            headers: {
+                Authorization: `Bearer ${this.cookies.get('userid')}`,
+                Workspace: `${this.cookies.get('workspace')}`
+            }
+        })
+        return request;
+    };
+
     async remove(id_service: string) {
         const request = await fnFetch<AuthResponse>({
             url: `${this.defaultUrl}/${id_service}`,

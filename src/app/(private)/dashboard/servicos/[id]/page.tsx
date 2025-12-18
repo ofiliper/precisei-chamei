@@ -42,7 +42,7 @@ export default function GalleryLayout() {
 
     return (
         <DashboardContainer>
-            <Servicos />
+            <Servicos action="update" />
         </DashboardContainer>
     );
 }

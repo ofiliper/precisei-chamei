@@ -6,6 +6,7 @@ const publicRoutes = [
     { path: '/manifest.json' },
     { path: '/servicos' },
     { path: '/auth/login', whenAuthenticated: 'redirect' },
+    { path: '/auth/confirmar', whenAuthenticated: 'redirect' },
     { path: '/auth/cadastrar', whenAuthenticated: 'redirect' },
     { path: '/auth/esqueci', whenAuthenticated: 'redirect' },
     { path: '/auth/recuperar', whenAuthenticated: 'redirect' },

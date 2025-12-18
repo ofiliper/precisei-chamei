@@ -19,6 +19,7 @@ import { useStore } from 'zustand';
 import { categoryStore } from '@/store/category/category-store';
 import ImageGallery from '@/components/shared/ImageGallery';
 import { serviceStore } from '@/store/services/services-store';
+import { useRouter } from 'next/navigation';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
@@ -37,17 +38,15 @@ interface ImageItem {
 // Tipo para controlar quem chamou o modal
 type ModalContext = 'COVER' | 'PROFILE' | 'GALLERY' | null;
 
-export default function Servicos() {
+export default function Servicos({ action = 'create' }: { action?: string }) {
     // --- Hooks ---
-    const { fetchServices, createService } = useServices();
+    const { fetchServices, createService, updateService } = useServices();
     const { fetchCategories } = useCategory();
 
     // --- Estados de Dados do Formulário ---
     const service = useStore(serviceStore);
 
-    const [serviceId, setServiceId] = useState<string | null>(null);
-    const [titulo, setTitulo] = useState('');
-    const [descricao, setDescricao] = useState('');
+
 
     // Imagens
     const [capaUrl, setCapaUrl] = useState("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=2000&auto=format&fit=crop");
@@ -77,6 +76,7 @@ export default function Servicos() {
     const categoryList = useStore(categoryStore);
     const [selectedCategory, setSelectedCategory] = useState<any>({});
     const [categorySearch, setCategorySearch] = useState('');
+    const router = useRouter();
 
     // --- 1. Carregamento Inicial ---
     useEffect(() => {
@@ -87,20 +87,6 @@ export default function Servicos() {
             const catResponse = await fetchCategories();
             if (catResponse.ok && Array.isArray(catResponse.data)) {
                 setCategories(catResponse.data);
-            }
-
-            // Carrega Serviço Existente (Simulação)
-            const servResponse = await fetchServices();
-            if (servResponse && servResponse.ok && Array.isArray(servResponse.data) && servResponse.data.length > 0) {
-                const existing = servResponse.data[0];
-                setServiceId(existing.id);
-                setTitulo(existing.title || '');
-                setDescricao(existing.description || '');
-                // Se o backend retornar esses campos, atualize aqui:
-                // setCapaUrl(existing.image || capaUrl);
-                // setPerfilUrl(existing.thumbnail || perfilUrl);
-                // setGaleriaUrls(existing.gallery || []);
-                // setSelectedCategory(existing.category || null);
             }
 
             setIsLoading(false);
@@ -138,25 +124,22 @@ export default function Servicos() {
 
             if (!data.erro) {
                 // Pega o estado ATUAL do zustand para não perder dados digitados nesse meio tempo
-                const currentContent = service.data.content || {};
-                const currentAddress = currentContent.address || {};
+                const currentContent = service.data.address || {};
 
                 const newData = {
                     ...currentContent,
-                    address: {
-                        ...currentAddress,
-                        // Preenche os campos com o retorno da API
-                        street: data.logradouro,
-                        neighborhood: data.bairro,
-                        city: data.localidade,
-                        state: data.uf,
-                        // Mantém o cep que já estava (ou formate se preferir)
-                        cep: currentAddress.cep
-                    }
+                    // Preenche os campos com o retorno da API
+                    street: data.logradouro,
+                    neighborhood: data.bairro,
+                    city: data.localidade,
+                    state: data.uf,
+                    // Mantém o cep que já estava (ou formate se preferir)
+                    cep: currentContent.cep
                 };
 
+
                 // Atualiza o store de uma vez
-                service.fnOnChange("content", newData);
+                service.fnOnChange("address", newData);
             }
         } catch (error) {
             console.error("Erro ao buscar CEP:", error);
@@ -189,25 +172,45 @@ export default function Servicos() {
     // --- Salvar ---
     const handleSave = async () => {
         setIsSaving(true);
+
         const payload = {
-            // id: serviceId,
-            name: titulo,
+            name: service.data.name,
             id_category: selectedCategory?.id,
             content: {
                 content: service.data.content.content,
-                address: service.data.content.address,
-                images: service.data.content.images,
                 social_media: service.data.content.social_media,
             },
-            image: capaUrl,        // Capa
-            thumbnail: perfilUrl,  // Perfil
+            address: service.data.address,
+            gallery: service.data.gallery,
+            cover_image: capaUrl,        // Capa
+            logo_image: perfilUrl,  // Perfil
         };
 
-        await createService(payload);
+        if (action === 'create') {
+
+            await createService(payload)
+                .then((data) => {
+                    //@ts-ignore
+                    if (data.data!.ok) {
+                        router.push("/dashboard")
+                    }
+                });
+        } else {
+
+
+            await updateService(service.data.id, payload)
+                .then((data) => {
+                    //@ts-ignore
+                    if (data.data!.ok) {
+                        router.push("/dashboard")
+                    }
+                });
+
+
+        }
         setIsSaving(false);
     };
 
-    // Filtro Categorias
     const filteredCategories = categoryList.data.rows!.length > 0
         ? categoryList.data.rows!.filter((cat) => ({
             name: cat.name.toLowerCase().includes(categorySearch.toLowerCase()),
@@ -216,7 +219,6 @@ export default function Servicos() {
         )
         : []
 
-    // Animações
     const itemVariants = {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
@@ -382,23 +384,19 @@ export default function Servicos() {
                                     name="cep"
                                     placeholder="00000-000"
                                     maxLength={9} // 8 números + 1 traço
-                                    value={service.data.content.address?.cep || ''}
+                                    value={service.data.address?.cep || ''}
 
                                     onChange={(e) => {
                                         const rawValue = e.target.value;
 
                                         // 1. Atualiza o estado visualmente (para o usuário ver o que digita)
-                                        const currentContent = service.data.content || {};
-                                        const currentAddress = currentContent.address || {};
+                                        const currentAddress = service.data.address || {};
 
                                         const newData = {
-                                            ...currentContent,
-                                            address: {
-                                                ...currentAddress,
-                                                cep: rawValue
-                                            }
+                                            ...currentAddress,
+                                            cep: rawValue
                                         };
-                                        service.fnOnChange("content", newData);
+                                        service.fnOnChange("address", newData);
 
                                         // 2. Limpa para pegar só números
                                         const cepOnlyNumbers = rawValue.replace(/\D/g, '');
@@ -411,43 +409,55 @@ export default function Servicos() {
                                     className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors"
                                 />
                             </div>
-                            <div className="md:col-span-8 space-y-2"><label className="text-sm font-bold text-slate-700">Rua</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="logradouro" value={service.data.content.address?.street || ''} onChange={(e) => {
-                                const newData = { ...service.data.content }
-                                newData.address = {
-                                    ...newData.address,
+                            <div className="md:col-span-8 space-y-2"><label className="text-sm font-bold text-slate-700">Rua</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="logradouro" value={service.data.address?.street || ''} onChange={(e) => {
+                                let newData = { ...service.data.address }
+                                newData = {
+                                    ...newData,
                                     street: e.target.value
                                 }
-                                service.fnOnChange("content", newData);
+                                service.fnOnChange("address", newData);
 
 
                             }} className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors" /></div>
-                            <div className="md:col-span-12 space-y-2"><label className="text-sm font-bold text-slate-700">Bairro</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="bairro" value={service.data.content.address?.neighborhood || ''} onChange={(e) => {
-                                const newData = { ...service.data.content }
-                                newData.address = {
-                                    ...newData.address,
+                            <div className="md:col-span-8 space-y-2"><label className="text-sm font-bold text-slate-700">Bairro</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="bairro" value={service.data.address?.neighborhood || ''} onChange={(e) => {
+                                let newData = { ...service.data.address }
+                                newData = {
+                                    ...newData,
                                     neighborhood: e.target.value
                                 }
-                                service.fnOnChange("content", newData);
 
+
+                                service.fnOnChange("address", newData);
 
                             }} className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors" /></div>
-                            <div className="md:col-span-8 space-y-2"><label className="text-sm font-bold text-slate-700">Cidade</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="localidade" value={service.data.content.address?.city || ''} onChange={(e) => {
-                                const newData = { ...service.data.content }
-                                newData.address = {
-                                    ...newData.address,
+                            <div className="md:col-span-4 space-y-2"><label className="text-sm font-bold text-slate-700">Número</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="bairro" value={service.data.address?.number || ''} onChange={(e) => {
+                                let newData = { ...service.data.address }
+                                newData = {
+                                    ...newData,
+                                    number: ~~e.target.value
+                                }
+
+
+                                service.fnOnChange("address", newData);
+
+                            }} className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors" /></div>
+                            <div className="md:col-span-8 space-y-2"><label className="text-sm font-bold text-slate-700">Cidade</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="localidade" value={service.data.address?.city || ''} onChange={(e) => {
+                                let newData = { ...service.data.address }
+                                newData = {
+                                    ...newData,
                                     city: e.target.value
                                 }
-                                service.fnOnChange("content", newData);
+                                service.fnOnChange("address", newData);
 
 
                             }} className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors" /></div>
-                            <div className="md:col-span-4 space-y-2"><label className="text-sm font-bold text-slate-700">UF</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="uf" value={service.data.content.address?.state || ''} onChange={(e) => {
-                                const newData = { ...service.data.content }
-                                newData.address = {
-                                    ...newData.address,
+                            <div className="md:col-span-4 space-y-2"><label className="text-sm font-bold text-slate-700">UF</label><motion.input whileFocus={{ scale: 1.01 }} type="text" name="uf" value={service.data.address?.state || ''} onChange={(e) => {
+                                let newData = { ...service.data.address }
+                                newData = {
+                                    ...newData,
                                     state: e.target.value
                                 }
-                                service.fnOnChange("content", newData);
+                                service.fnOnChange("address", newData);
 
 
                             }} className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none focus:border-emerald-500 transition-colors" /></div>

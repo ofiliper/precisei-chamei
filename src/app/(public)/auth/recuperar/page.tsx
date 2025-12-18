@@ -1,32 +1,104 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Mail, CheckCircle, Lock, Eye, EyeOff } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ForgotPasswordPage() {
-    const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [isSubmitted, setIsSubmitted] = useState(false); // Estado para controlar a tela de sucesso
+    // Hooks de navegação e params
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { toast } = useToast();
 
-    const handleRecover = (e: React.FormEvent) => {
+    // Captura os parâmetros 'e' (email) e 't' (token) da URL
+    const emailParam = searchParams.get('e');
+    const tokenParam = searchParams.get('t');
+
+    // Determina se é modo de redefinição (tem token e email) ou recuperação (padrão)
+    const isResetMode = !!(emailParam && tokenParam);
+
+    // Estados
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
+    const [loading, setLoading] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const authHook = useAuth();
+    // Preenche o email se vier na URL
+    useEffect(() => {
+        if (emailParam) {
+            setEmail(emailParam);
+        }
+    }, [emailParam]);
+
+    // Handler para solicitar o link (Esqueci minha senha)
+    const handleRecover = async (e: React.FormEvent) => {
         e.preventDefault();
-        // setLoading(true);
+        setLoading(true);
 
-        // // Simulando chamada à API de recuperação
-        // // Substitua por useAuth().fetchForgotPassword({ email })
-        // useAuth().fetchForgotPassword({ email })
-        //     .then(() => {
-        //         setIsSubmitted(true);
-        //     })
-        //     .catch((error) => {
-        //         console.error(error);
-        //         // Aqui você pode adicionar um toast de erro se quiser
-        //     })
-        //     .finally(() => setLoading(false));
+        try {
+            // useAuth().fetchForgotPassword({ email })
+            // Simulação de delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setIsSubmitted(true);
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Erro",
+                description: "Não foi possível enviar o email. Tente novamente.",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handler para redefinir a senha (Nova senha)
+    const handleResetPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (password !== confirmPassword) {
+            toast({
+                variant: "destructive",
+                title: "Senhas não coincidem",
+                description: "Por favor, verifique se a confirmação da senha está igual.",
+            });
+            return;
+        }
+
+        if (password.length < 6) {
+            toast({
+                variant: "destructive",
+                title: "Senha muito curta",
+                description: "A senha deve ter no mínimo 6 caracteres.",
+            });
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // Aqui você chama a função real de reset
+            await useAuth().fetchChangePassword({ email, token: tokenParam as string, password });
+
+            // Simulação
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setIsSubmitted(true);
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Erro ao redefinir",
+                description: "Token inválido ou expirado.",
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -41,15 +113,21 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {isSubmitted ? (
-                    /* TELA DE SUCESSO (Pós-envio) */
+                    /* TELA DE SUCESSO (Genérica para ambos os casos) */
                     <div className="text-center animate-in fade-in zoom-in duration-300">
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
                             <CheckCircle className="h-8 w-8 text-emerald-600" />
                         </div>
-                        <h2 className="mb-2 text-2xl font-bold text-slate-800">Verifique seu e-mail</h2>
+
+                        <h2 className="mb-2 text-2xl font-bold text-slate-800">
+                            {isResetMode ? "Senha alterada!" : "Verifique seu e-mail"}
+                        </h2>
+
                         <p className="mb-8 text-slate-600">
-                            Enviamos um link de recuperação para <span className="font-medium text-slate-800">{email}</span>.
-                            Verifique sua caixa de entrada (e spam).
+                            {isResetMode
+                                ? "Sua senha foi redefinida com sucesso. Agora você pode fazer login com suas novas credenciais."
+                                : <>Enviamos um link de recuperação para <span className="font-medium text-slate-800">{email}</span>. Verifique sua caixa de entrada.</>
+                            }
                         </p>
 
                         <button
@@ -59,61 +137,116 @@ export default function ForgotPasswordPage() {
                             Voltar para o Login
                         </button>
 
-                        <button
-                            onClick={() => setIsSubmitted(false)}
-                            className="mt-4 text-sm text-slate-500 hover:text-emerald-600"
-                        >
-                            Tentar outro e-mail
-                        </button>
+                        {!isResetMode && (
+                            <button
+                                onClick={() => setIsSubmitted(false)}
+                                className="mt-4 text-sm text-slate-500 hover:text-emerald-600"
+                            >
+                                Tentar outro e-mail
+                            </button>
+                        )}
                     </div>
                 ) : (
-                    /* FORMULÁRIO DE RECUPERAÇÃO */
+                    /* FORMULÁRIO (Alterna entre Reset e Recover) */
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div className="mb-8 text-center">
-                            <h1 className="text-2xl font-bold text-slate-800">Esqueceu a senha?</h1>
+                            <h1 className="text-2xl font-bold text-slate-800">
+                                {isResetMode ? "Criar nova senha" : "Esqueceu a senha?"}
+                            </h1>
                             <p className="mt-2 text-sm text-slate-600">
-                                Não se preocupe! Digite seu e-mail abaixo e enviaremos as instruções para redefinir sua senha.
+                                {isResetMode
+                                    ? "Digite e confirme sua nova senha abaixo."
+                                    : "Não se preocupe! Digite seu e-mail abaixo e enviaremos as instruções."
+                                }
                             </p>
                         </div>
 
-                        <form onSubmit={handleRecover} className="space-y-6">
-                            <div className="space-y-1">
-                                <label htmlFor="email" className="text-sm font-medium text-slate-600">
-                                    E-mail cadastrado
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                        <Mail size={18} />
+                        {isResetMode ? (
+                            /* --- FORMULÁRIO DE REDEFINIÇÃO (COM PARAMS) --- */
+                            <form onSubmit={handleResetPassword} className="space-y-6">
+                                {/* Campo Senha */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-600">Nova Senha</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <Lock size={18} />
+                                        </div>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="w-full rounded border border-gray-200 bg-white pl-10 pr-10 py-3 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
                                     </div>
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        required
-                                        placeholder="email@email.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full rounded border border-gray-200 bg-white pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-gray-300 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                                    />
                                 </div>
-                            </div>
 
-                            {loading ? (
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="flex w-full items-center justify-center rounded bg-emerald-600 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
-                                >
-                                    Enviando instruções...
-                                </button>
-                            ) : (
+                                {/* Campo Confirmar Senha */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-600">Confirmar Senha</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <Lock size={18} />
+                                        </div>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="w-full rounded border border-gray-200 bg-white pl-10 pr-4 py-3 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                </div>
+
                                 <button
                                     type="submit"
-                                    className="w-full rounded bg-[#2E8B57] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#257045]"
+                                    disabled={loading}
+                                    className="w-full rounded bg-[#2E8B57] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#257045] disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-                                    Enviar link de recuperação
+                                    {loading ? "Redefinindo..." : "Redefinir Senha"}
                                 </button>
-                            )}
-                        </form>
+                            </form>
+                        ) : (
+                            /* --- FORMULÁRIO DE RECUPERAÇÃO (PADRÃO) --- */
+                            <form onSubmit={handleRecover} className="space-y-6">
+                                <div className="space-y-1">
+                                    <label htmlFor="email" className="text-sm font-medium text-slate-600">
+                                        E-mail cadastrado
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <Mail size={18} />
+                                        </div>
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            required
+                                            placeholder="email@email.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="w-full rounded border border-gray-200 bg-white pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-gray-300 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full rounded bg-[#2E8B57] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#257045] disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? "Enviando..." : "Enviar link de recuperação"}
+                                </button>
+                            </form>
+                        )}
 
                         <div className="mt-8 border-t border-gray-100 pt-6 text-center">
                             <a

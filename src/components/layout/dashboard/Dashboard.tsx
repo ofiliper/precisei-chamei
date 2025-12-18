@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DashboardContainer from "@/components/shared/Dashboard/Dashboard";
-import { ChevronLeft, ChevronRight, Edit3, Trash2, AlertTriangle, X, Eye, MousePointerClick } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit3, Trash2, AlertTriangle, X, Eye, MousePointerClick, ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useServices from "@/hooks/useServices";
 import { useStore } from "zustand";
@@ -12,7 +12,7 @@ export default function DashboardLayout() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     // 1. Novo estado para armazenar o serviço que será excluído
     const [serviceToDelete, setServiceToDelete] = useState<any>(null);
-    
+
     const servicesHook = useServices();
     const services = useStore(serviceListStore);
 
@@ -22,7 +22,7 @@ export default function DashboardLayout() {
 
         // Chama a função de delete do hook passando o ID (assumindo que seja _id ou id)
         await servicesHook.deleteService(serviceToDelete._id || serviceToDelete.id);
-        
+
         // Atualiza a lista após excluir
         await servicesHook.fetchServices();
 
@@ -106,77 +106,119 @@ export default function DashboardLayout() {
                             transition={{ delay: 0.3 }}
                             className="bg-white rounded-[2rem] shadow-sm p-4 overflow-hidden"
                         >
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[600px]">
-                                    <thead>
-                                        <tr>
-                                            <th className="p-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">Nome</th>
-                                            <th className="p-6 text-xs font-semibold text-gray-400 text-center uppercase tracking-wider">Visualizações</th>
-                                            <th className="p-6 text-xs font-semibold text-gray-400 text-center uppercase tracking-wider">Cliques em contato</th>
-                                            <th className="p-6 text-xs font-semibold text-gray-400 text-center uppercase tracking-wider">Última atualização</th>
-                                            <th className="p-6 text-xs font-semibold text-gray-400 text-right uppercase tracking-wider">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-gray-600">
-                                        {
-                                            services.data.services &&
-                                            services.data.services.length > 0 &&
-                                            services.data.services.map((serv, _) => {
-                                                return (
-                                                    <tr key={_} className="border-t border-gray-50 hover:bg-gray-50 transition-colors">
-                                                        <td className="p-6">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden p-1 shadow-sm">
-                                                                    <img src="https://i.pravatar.cc/150?img=30" alt="Service" className="object-cover w-full h-full rounded-xl" />
-                                                                </div>
-                                                                <span className="font-bold text-gray-700 text-lg">{serv.name}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-6 text-center">
-                                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                                                                <Eye size={14} strokeWidth={2.5} />
-                                                                24
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-6 text-center">
-                                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                                                                <MousePointerClick size={14} strokeWidth={2.5} />
-                                                                12
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-6 text-center font-medium">{new Date(serv.createdAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}</td>
-                                                        <td className="p-6">
-                                                            <div className="flex items-center justify-end gap-6">
-                                                                <motion.a
-                                                                    whileHover={{ scale: 1.1, color: "#2c8b96" }}
-                                                                    whileTap={{ scale: 0.9 }}
-                                                                    href="/dashboard/servicos"
-                                                                    className="flex items-center gap-2 text-sm text-gray-500 font-medium transition-colors"
-                                                                >
-                                                                    <Edit3 size={18} />
-                                                                    Editar
-                                                                </motion.a>
+                            <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse min-w-[700px]">
+                                        <thead>
+                                            <tr className="bg-gray-50/50 border-b border-gray-200">
+                                                <th className="p-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Serviço</th>
+                                                <th className="p-5 text-xs font-bold text-gray-500 text-center uppercase tracking-wider">Visualizações</th>
+                                                <th className="p-5 text-xs font-bold text-gray-500 text-center uppercase tracking-wider">Cliques</th>
+                                                <th className="p-5 text-xs font-bold text-gray-500 text-center uppercase tracking-wider">Atualização</th>
+                                                <th className="p-5 text-xs font-bold text-gray-500 text-right uppercase tracking-wider">Ações</th>
+                                            </tr>
+                                        </thead>
 
-                                                                <motion.button
-                                                                    whileHover={{ scale: 1.1, color: "#ef4444" }}
-                                                                    whileTap={{ scale: 0.9 }}
-                                                                    // 3. Ao clicar, salvamos o objeto 'serv' no state
-                                                                    onClick={() => {
-                                                                        setServiceToDelete(serv);
-                                                                        setIsDeleteModalOpen(true);
-                                                                    }}
-                                                                    className="text-gray-400 transition-colors"
-                                                                >
-                                                                    <Trash2 size={18} />
-                                                                </motion.button>
+                                        <tbody className="divide-y divide-gray-100 bg-white">
+                                            {/* 2. Ternário Principal de Renderização da Lista */}
+
+                                            {
+                                                services.data.services &&
+                                                    services.data.services.length > 0 ? (
+                                                    services.data.services.map((serv, key) => (
+                                                        <tr
+                                                            key={key}
+                                                            className="group hover:bg-gray-50/80 transition-all duration-200"
+                                                        >
+                                                            <td className="p-5">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="relative w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
+                                                                        {/* 3. Ternário de Imagem: Se tem imagem, mostra IMG, senão mostra Ícone */}
+                                                                        {serv.image ? (
+                                                                            <img
+                                                                                src={serv.image}
+                                                                                alt={serv.name}
+                                                                                className="object-cover w-full h-full"
+                                                                            />
+                                                                        ) : (
+                                                                            <ImageOff size={20} className="text-gray-400" />
+                                                                        )}
+                                                                    </div>
+
+                                                                    <div className="flex flex-col">
+                                                                        <span className="font-semibold text-gray-900 text-base group-hover:text-emerald-600 transition-colors">
+                                                                            {serv.name}
+                                                                        </span>
+                                                                        {/* <span className="text-xs text-gray-400">
+                                                                            {serv.id_category || `ID: ${serv.id?.slice(0, 6) || "..."}`}
+                                                                        </span> */}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <td className="p-5 text-center align-middle">
+                                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                                                    <Eye size={14} /> {serv.views || 0}
+                                                                </span>
+                                                            </td>
+
+                                                            <td className="p-5 text-center align-middle">
+                                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                                    <MousePointerClick size={14} /> {serv.clicks || 0}
+                                                                </span>
+                                                            </td>
+
+                                                            <td className="p-5 text-center text-sm text-gray-500 whitespace-nowrap">
+                                                                {new Date(serv.createdAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
+                                                            </td>
+
+                                                            <td className="p-5">
+                                                                <div className="flex items-center justify-end gap-3">
+                                                                    <motion.a
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.95 }}
+                                                                        href={`/dashboard/servicos/${serv.id}`}
+                                                                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                                        title="Editar"
+                                                                    >
+                                                                        <Edit3 size={18} strokeWidth={2} />
+                                                                    </motion.a>
+
+                                                                    <motion.button
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.95 }}
+                                                                        onClick={() => {
+                                                                            setServiceToDelete(serv);
+                                                                            setIsDeleteModalOpen(true);
+                                                                        }}
+                                                                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                                        title="Excluir"
+                                                                    >
+                                                                        <Trash2 size={18} strokeWidth={2} />
+                                                                    </motion.button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    /* Caso Falso do Ternário Principal (Empty State) */
+                                                    <tr>
+                                                        <td colSpan={5} className="p-12 text-center">
+                                                            <div className="flex flex-col items-center justify-center text-gray-400 animate-in fade-in duration-500">
+                                                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
+                                                                    <ImageOff size={32} opacity={0.5} />
+                                                                </div>
+                                                                <p className="text-lg font-medium text-gray-900">Nenhum serviço encontrado</p>
+                                                                <p className="text-sm text-gray-500 mt-1 max-w-xs mx-auto">
+                                                                    Você ainda não cadastrou nenhum serviço.
+                                                                </p>
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                )
-                                            })
-                                        }
-                                    </tbody>
-                                </table>
+                                                )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             {/* Paginação */}

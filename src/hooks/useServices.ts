@@ -14,14 +14,14 @@ const useServices = () => {
     const fetchOneService = async (id: string) => {
         try {
             const request = await servicesService.readOne(id);
-            console.log(request.data)
-            service.fnOnChange("id", request.data.data.id);
+            service.fnOnChange("id", request.data.data?.id || null);
             service.fnOnChange("id_workspace", request.data.data.id_workspace);
             service.fnOnChange("id_category", request.data.data.id_category);
             service.fnOnChange("name", request.data.data.name);
             service.fnOnChange("image", request.data.data.image);
             service.fnOnChange("cover_image", request.data.data.cover_image);
             service.fnOnChange("content", request.data.data.content);
+            service.fnOnChange("address", request.data.data.Address);
             service.fnOnChange("fetching", false);
             return request
         } catch (error: any) {
@@ -78,6 +78,28 @@ const useServices = () => {
         }
     }
 
+    const updateService = async (id_service: string, data: any) => {
+        try {
+            const request = await servicesService.update(id_service, data)
+
+            toast({
+                title: 'Serviço atualizado',
+                description: 'O serviço foi atualizado com sucesso.',
+                variant: 'default',
+            })
+
+            return request
+        } catch (error: any) {
+            toast({
+                title: 'Erro ao criar',
+                description: 'Não foi possível atualizar o serviço.',
+                variant: 'destructive',
+            })
+
+            return { ok: false, message: error.message || error }
+        }
+    }
+
     // 3. Remover serviço (remove)
     const deleteService = async (id: string) => {
         try {
@@ -105,6 +127,7 @@ const useServices = () => {
         fetchServices,
         fetchOneService,
         createService,
+        updateService,
         deleteService
     }
 }

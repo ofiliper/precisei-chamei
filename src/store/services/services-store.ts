@@ -30,10 +30,18 @@ interface IProps {
     cover_image: string | null; // Pode vir string vazia ou null
     content: {
         content: any,
-        address: any,
-        images: any,
         social_media: any
     };
+    address: {
+        cep: string
+        street: string
+        neighborhood: string
+        number: number
+        city: string
+        state: string
+    },
+    gallery: [],
+
     // Category: IServiceCategory; // Relacionamento
 }
 
@@ -47,9 +55,15 @@ const stateDefault: IProps = {
     cover_image: '',
     content: {
         content: "",
-        images: {},
-        address: {},
         social_media: {}
+    },
+    address: {
+        cep: '',
+        street: '',
+        neighborhood: '',
+        number: 0,
+        city: '',
+        state: ''
     },
     // Category: null,
 }
