@@ -1,7 +1,7 @@
 {
-    "name": "Digital Nutri",
-    "short_name": "Digital Nutri",
-    "description": "Nutricionista virtual com inteligencia artificial",
+    "name": "Precisei Chamei",
+    "short_name": "Precisei Chamei",
+    "description": "Tudo pra facilitar seu dia a dia",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
