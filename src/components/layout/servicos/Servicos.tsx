@@ -6,7 +6,8 @@ import DashboardContainer from "@/components/shared/Dashboard/Dashboard";
 import {
     Trash2, Plus, Save, Upload, MapPin,
     Facebook, Instagram, Youtube, Twitter, Image as ImageIcon, Camera,
-    ChevronDown, Check, Search as SearchIcon, X, Loader2, UploadCloud
+    ChevronDown, Check, Search as SearchIcon, X, Loader2, UploadCloud,
+    Trash
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import 'react-quill/dist/quill.snow.css';
@@ -20,6 +21,8 @@ import { categoryStore } from '@/store/category/category-store';
 import ImageGallery from '@/components/shared/ImageGallery';
 import { serviceStore } from '@/store/services/services-store';
 import { useRouter } from 'next/navigation';
+import useWorkspace from '@/hooks/useWorkspace';
+import { workspaceStore } from '@/store/workspace/workspace-store';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
@@ -42,6 +45,7 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
     // --- Hooks ---
     const { fetchServices, createService, updateService } = useServices();
     const { fetchCategories } = useCategory();
+    const workspace = useStore(workspaceStore);
 
     // --- Estados de Dados do Formulário ---
     const service = useStore(serviceStore);
@@ -49,8 +53,7 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 
 
     // Imagens
-    const [capaUrl, setCapaUrl] = useState("https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=2000&auto=format&fit=crop");
-    const [perfilUrl, setPerfilUrl] = useState("https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=2000&auto=format&fit=crop");
+
     const [galeriaUrls, setGaleriaUrls] = useState<string[]>([]); // Lista de fotos do serviço
 
     // --- Estados de UI ---
@@ -85,15 +88,17 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 
             // Carrega Categorias
             const catResponse = await fetchCategories();
-            if (catResponse.ok && Array.isArray(catResponse.data)) {
-                setCategories(catResponse.data);
+            // console.log(catResponse.data.data.find((item: any) => item.id === service.data.id_category))
+            if (catResponse.data.ok && Array.isArray(catResponse.data.data)) {
+                const category = catResponse.data.data.find((item: any) => item.id === service.data.id_category);
+                setSelectedCategory(category);
             }
 
             setIsLoading(false);
         };
 
         loadInitialData();
-    }, []);
+    }, [service.data.id]);
 
     // --- Handlers Auxiliares ---
 
@@ -134,7 +139,7 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                     city: data.localidade,
                     state: data.uf,
                     // Mantém o cep que já estava (ou formate se preferir)
-                    cep: currentContent.cep
+                    cep: data.cep
                 };
 
 
@@ -150,19 +155,7 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
     // --- Lógica do Modal de Imagem ---
 
     // Função chamada quando o usuário clica em uma imagem no Modal
-    const handleImageSelectedInModal = (url: string) => {
-        if (modalContext === 'COVER') {
-            setCapaUrl(url);
-        } else if (modalContext === 'PROFILE') {
-            setPerfilUrl(url);
-        } else if (modalContext === 'GALLERY') {
-            // Adiciona ao array de galeria se não existir
-            if (!galeriaUrls.includes(url)) {
-                setGaleriaUrls(prev => [...prev, url]);
-            }
-        }
-        setModalContext(null); // Fecha modal
-    };
+
 
     // Remove imagem da galeria (lista pequena)
     const removeGalleryImage = (indexToRemove: number) => {
@@ -182,8 +175,8 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
             },
             address: service.data.address,
             gallery: service.data.gallery,
-            cover_image: capaUrl,        // Capa
-            logo_image: perfilUrl,  // Perfil
+            cover_image: service.data.cover_image,        // Capa
+            logo_image: service.data.logo_image,  // Perfil
         };
 
         if (action === 'create') {
@@ -263,7 +256,10 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 
                         {/* CAPA */}
                         <div className="relative h-64 md:h-80 w-full rounded-xl overflow-hidden group bg-gray-100">
-                            <img src={capaUrl} alt="Capa" className="w-full h-full object-cover" />
+                            <img src={service.data.cover_image
+                                ? `${process.env.NEXT_PUBLIC_UPLOAD_URL}/${workspace.data.id}/${service.data.cover_image}`
+                                : "https://placehold.co/800x400/f1f5f9/cbd5e1?text=Adicionar+Capa" // Fallback
+                            } alt="Capa" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <motion.button
@@ -272,6 +268,13 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                                     className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg text-sm font-medium text-slate-700 hover:bg-white shadow-lg"
                                 >
                                     <Upload size={16} /> Alterar Capa
+                                </motion.button>
+                                <motion.button
+                                    onClick={() => service.fnOnChange("cover_image", null)} // Abre modal contexto CAPA
+                                    whileHover={{ scale: 1.1 }}
+                                    className="top-2 right-2 p-2  text-rose-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg bg-transparent"
+                                >
+                                    <Trash size={16} />
                                 </motion.button>
                             </div>
                         </div>
@@ -282,7 +285,11 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                                 whileHover={{ scale: 1.02 }}
                                 className="relative group w-32 h-32 md:w-40 md:h-40 rounded-2xl border-[6px] border-white shadow-xl bg-white overflow-hidden"
                             >
-                                <img src={perfilUrl} alt="Thumbnail" className="w-full h-full object-cover" />
+
+                                <img src={service.data.logo_image
+                                    ? `${process.env.NEXT_PUBLIC_UPLOAD_URL}/${workspace.data.id}/${service.data.logo_image}`
+                                    : "https://placehold.co/400x400/f1f5f9/cbd5e1?text=Logo" // Fallback
+                                } alt="Thumbnail" className="w-full h-full object-cover" />
 
                                 {/* Overlay de Edição */}
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
@@ -293,6 +300,13 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                                             className="p-2 bg-white rounded-full text-slate-800"
                                         >
                                             <Camera size={18} />
+                                        </motion.button>
+                                        <motion.button
+                                            onClick={() => service.fnOnChange("logo_image", null)} // Abre modal contexto CAPA
+                                            whileHover={{ scale: 1.1 }}
+                                            className="absolute top-2 right-2 p-2  text-rose-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg bg-transparent"
+                                        >
+                                            <Trash2 size={16} />
                                         </motion.button>
                                     </div>
                                 </div>
@@ -312,7 +326,12 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                             <label className="text-sm font-bold text-slate-700">Categoria</label>
                             <div className="relative">
                                 <motion.button whileTap={{ scale: 0.99 }} onClick={() => setIsCategoryOpen(!isCategoryOpen)} className={`w-full px-4 py-3 bg-white border rounded-xl flex items-center justify-between text-left transition-all outline-none ${isCategoryOpen ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-gray-100 hover:border-gray-300'}`}>
-                                    <span className={`font-medium ${selectedCategory ? 'text-slate-700' : 'text-gray-400'}`}>{selectedCategory ? selectedCategory.name : "Selecione uma categoria"}</span>
+                                    <span className={`font-medium ${selectedCategory ? 'text-slate-700' : 'text-gray-400'}`}>
+                                        {
+                                            // selectedCategory ?
+                                            selectedCategory?.name || "Selecione uma categoria"
+                                        }
+                                    </span>
                                     <motion.div animate={{ rotate: isCategoryOpen ? 180 : 0 }}><ChevronDown size={18} className="text-gray-400" /></motion.div>
                                 </motion.button>
 
@@ -323,12 +342,20 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                                                 <div className="flex items-center px-3 py-2 bg-gray-50 rounded-lg"><SearchIcon size={16} className="text-gray-400 mr-2" /><input autoFocus type="text" placeholder="Buscar..." className="bg-transparent w-full text-sm outline-none text-slate-700" value={categorySearch} onChange={(e) => setCategorySearch(e.target.value)} /></div>
                                             </div>
                                             <ul className="max-h-60 overflow-y-auto p-1">
-                                                {filteredCategories.length > 0 ? filteredCategories.map((cat) => (
-                                                    <motion.li key={cat.id} whileHover={{ backgroundColor: "rgb(249 250 251)" }} onClick={() => { setSelectedCategory(cat); setIsCategoryOpen(false); setCategorySearch(''); }} className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer ${selectedCategory?.id === cat.id ? 'bg-emerald-50 text-emerald-700 font-medium' : 'text-slate-600'}`}>
-                                                        {cat.name}
-                                                        {selectedCategory?.id === cat.id && <Check size={16} className="text-emerald-600" />}
-                                                    </motion.li>
-                                                )) : <li className="px-3 py-4 text-center text-sm text-gray-400">Nenhuma categoria encontrada.</li>}
+                                                {filteredCategories.length > 0
+                                                    ? filteredCategories.map((cat) => (
+                                                        <motion.li
+                                                            key={cat.id}
+                                                            whileHover={{ backgroundColor: "rgb(249 250 251)" }}
+                                                            onClick={() => { setSelectedCategory(cat); setIsCategoryOpen(false); setCategorySearch(''); }}
+                                                            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer ${selectedCategory?.id === cat.id
+                                                                ? 'bg-emerald-50 text-emerald-700 font-medium'
+                                                                : 'text-slate-600'}`}>
+                                                            {cat.name}
+                                                            {selectedCategory?.id === cat.id && <Check size={16} className="text-emerald-600" />}
+                                                        </motion.li>
+                                                    ))
+                                                    : <li className="px-3 py-4 text-center text-sm text-gray-400">Nenhuma categoria encontrada.</li>}
                                             </ul>
                                         </motion.div>
                                     )}
@@ -486,7 +513,7 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 
                             {/* Lista Dinâmica da Galeria */}
                             <AnimatePresence>
-                                {galeriaUrls.map((url, idx) => (
+                                {service.data.gallery.map((url, idx) => (
                                     <motion.div
                                         key={`${url}-${idx}`}
                                         initial={{ opacity: 0, scale: 0.8 }}
@@ -495,9 +522,17 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                                         whileHover={{ y: -5 }}
                                         className="relative group aspect-square rounded-2xl overflow-hidden shadow-sm bg-gray-100 border border-gray-100"
                                     >
-                                        <img src={url} className="w-full h-full object-cover" alt={`Galeria ${idx}`} />
+                                        <img src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${workspace.data.id}/${url}`} className="w-full h-full object-cover" alt={`Galeria ${idx}`} />
                                         <motion.button
-                                            onClick={() => removeGalleryImage(idx)}
+                                            onClick={() => {
+                                                const newData = [...service.data.gallery];
+
+                                                // Remove 1 item na posição idx
+                                                newData.splice(idx, 1);
+
+                                                // Atualiza o estado
+                                                service.fnOnChange("gallery", newData);
+                                            }}
                                             whileHover={{ scale: 1.1 }}
                                             className="absolute top-2 right-2 p-2 bg-white/90 text-rose-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-white"
                                         >
@@ -584,7 +619,6 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                     <GalleryModal
                         context={modalContext}
                         onClose={() => setModalContext(null)}
-                        onSelect={handleImageSelectedInModal}
                     />
                 )}
             </AnimatePresence>
@@ -593,13 +627,14 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 }
 
 // --- SUB-COMPONENTE: MODAL DE GALERIA ---
-function GalleryModal({ onClose, onSelect, context }: { onClose: () => void, onSelect: (url: string) => void, context: ModalContext }) {
+function GalleryModal({ onClose, context }: { onClose: () => void, }) {
     const { fetchImages, uploadImage } = useImages();
     const [images, setImages] = useState<ImageItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const BASE_IMAGE_URL = "";
+    const service = useStore(serviceStore)
 
     useEffect(() => { loadData(); }, []);
 
@@ -609,18 +644,6 @@ function GalleryModal({ onClose, onSelect, context }: { onClose: () => void, onS
         if (response && response.ok && Array.isArray(response.data)) setImages(response.data);
         setIsLoading(false);
     };
-
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length === 0) return;
-        setIsUploading(true);
-        await Promise.all(Array.from(files).map(async (file) => await uploadImage({ image: file })));
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        await loadData();
-        setIsUploading(false);
-    };
-
-    const getImageUrl = (path: string) => (!path ? '' : path.startsWith('http') ? path : `${BASE_IMAGE_URL}${path}`);
 
     // Título dinâmico do Modal
     const getTitle = () => {
@@ -642,26 +665,28 @@ function GalleryModal({ onClose, onSelect, context }: { onClose: () => void, onS
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} className="text-gray-500" /></button>
                 </div>
                 <div className='px-6 overflow-scroll'>
-                    <ImageGallery showTitle={false} />
+                    <ImageGallery
+                        callback={(img) => {
+                            if (context === 'COVER') {
+                                service.fnOnChange("cover_image", img.path)
+                                onClose()
+                                return
+                            };
+                            if (context === 'PROFILE') {
+                                service.fnOnChange("logo_image", img.path)
+                                onClose()
+                                return
+                            };
+                            if (context === 'GALLERY') {
+                                service.fnOnChange("gallery", [...service.data.gallery, img.path])
+                                onClose()
+                                return
+                            };
+
+                        }}
+                        showDetails={false}
+                        showTitle={false} />
                 </div>
-                {/* <div className="p-4 px-6 flex justify-end border-b border-gray-100">
-                    <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleUpload} />
-                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
-                        {isUploading ? <Loader2 className="animate-spin" size={16} /> : <UploadCloud size={16} />} Fazer Upload
-                    </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6 bg-gray-50/30">
-                    {isLoading ? <div className="flex justify-center items-center h-full"><Loader2 className="animate-spin text-emerald-600" size={32} /></div> : images.length === 0 ? <div className="text-center text-gray-400 py-20">Nenhuma imagem encontrada.</div> : (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {images.map((img) => (
-                                <motion.div key={img.id} whileHover={{ scale: 1.02 }} className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-emerald-500 transition-all" onClick={() => onSelect(getImageUrl(img.path))}>
-                                    <img src={getImageUrl(img.path)} className="w-full h-full object-cover" alt="Galeria" />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center"><span className="bg-emerald-600 text-white text-xs px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">Selecionar</span></div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
-                </div> */}
             </motion.div>
         </div>
     );

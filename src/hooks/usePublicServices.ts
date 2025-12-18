@@ -1,19 +1,21 @@
 import { toast } from '@/hooks/use-toast'
+import { PublicServiceService } from '@/services/api/public-service.service';
 import { ServicesService } from '@/services/api/services.service' // Ajuste o caminho se necessário
 import { serviceListStore } from '@/store/services/service-list-store';
 import { serviceStore } from '@/store/services/services-store';
 import { useStore } from 'zustand';
 
-const useServices = () => {
+const usePublicServices = () => {
 
-    const servicesService = new ServicesService();
+    const publicServicesService = new PublicServiceService();
     const servicesList = useStore(serviceListStore);
     const service = useStore(serviceStore);
 
     // 1. Listar todos os serviços (readAll)
     const fetchOneService = async (id: string) => {
         try {
-            const request = await servicesService.readOne(id);
+            const request = await publicServicesService.readOne(id);
+            console.log(request)
             console.log(request)
             service.fnOnChange("id", request.data.data?.id || null);
             service.fnOnChange("id_workspace", request.data.data.id_workspace);
@@ -40,7 +42,8 @@ const useServices = () => {
 
     const fetchServices = async () => {
         try {
-            const request = await servicesService.readAll();
+            const request = await publicServicesService.readAll();
+            console.log(request)
             servicesList.fnOnChange("services", request.data.data);
             servicesList.fnOnChange("fetching", false);
             return request
@@ -58,80 +61,13 @@ const useServices = () => {
 
     // 2. Criar serviço (create)
     // Notei que seu service pede { image: any }, mantive a tipagem.
-    const createService = async (data: any) => {
-        try {
-            const request = await servicesService.create(data)
-
-            toast({
-                title: 'Serviço criado',
-                description: 'O novo serviço foi cadastrado com sucesso.',
-                variant: 'default',
-            })
-
-            return request
-        } catch (error: any) {
-            toast({
-                title: 'Erro ao criar',
-                description: 'Não foi possível cadastrar o serviço.',
-                variant: 'destructive',
-            })
-
-            return { ok: false, message: error.message || error }
-        }
-    }
-
-    const updateService = async (id_service: string, data: any) => {
-        try {
-            const request = await servicesService.update(id_service, data)
-
-            toast({
-                title: 'Serviço atualizado',
-                description: 'O serviço foi atualizado com sucesso.',
-                variant: 'default',
-            })
-
-            return request
-        } catch (error: any) {
-            toast({
-                title: 'Erro ao criar',
-                description: 'Não foi possível atualizar o serviço.',
-                variant: 'destructive',
-            })
-
-            return { ok: false, message: error.message || error }
-        }
-    }
-
-    // 3. Remover serviço (remove)
-    const deleteService = async (id: string) => {
-        try {
-            const request = await servicesService.remove(id)
-
-            toast({
-                title: 'Serviço removido',
-                description: 'O serviço foi excluído com sucesso.',
-                variant: 'default',
-            })
-            fetchServices();
-            return request
-        } catch (error: any) {
-            toast({
-                title: 'Erro ao excluir',
-                description: 'Não foi possível remover o serviço.',
-                variant: 'destructive',
-            })
-
-            return { ok: false, message: error.message || error }
-        }
-    }
+  
 
     return {
         fetchServices,
         fetchOneService,
-        createService,
-        updateService,
-        deleteService
+     
     }
 }
 
-export default useServices
+export default usePublicServices

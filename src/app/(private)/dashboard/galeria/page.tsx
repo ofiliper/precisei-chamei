@@ -22,11 +22,14 @@ interface ImageItem {
 }
 
 export default function GalleryLayout() {
-    
+
 
     return (
         <DashboardContainer>
-             <ImageGallery />
+            <ImageGallery
+            
+                showDetails={true}
+                showTitle={true} />
         </DashboardContainer>
     );
 }

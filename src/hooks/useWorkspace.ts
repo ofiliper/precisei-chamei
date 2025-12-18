@@ -13,14 +13,13 @@ const useWorkspace = () => {
         try {
             const request = await workspaceService.read()
 
-            const userData = request.data.data?.User_workspaces?.[0]?.User 
+            const userData = request.data.data?.User_workspaces?.[0]?.User
                 ? {
                     name: request.data.data.User_workspaces[0].User.name,
                     email: request.data.data.User_workspaces[0].User.email,
-                  }
-                : { name: '', email: '' }; // Fallback seguro
+                }
+                : { name: '', email: '' };
 
-            // Atualiza a Store Global (Zustand)
             workspace.fnOnChange("id", request.data.data.id)
             workspace.fnOnChange("name", request.data.data.name)
             workspace.fnOnChange("user", userData)

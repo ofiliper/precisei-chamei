@@ -4,7 +4,7 @@ import { MiddlewareConfig, NextRequest } from 'next/server';
 const publicRoutes = [
     { path: '/' },
     { path: '/manifest.json' },
-    { path: '/servicos' },
+    { path: '/servico' },
     { path: '/auth/login', whenAuthenticated: 'redirect' },
     { path: '/auth/confirmar', whenAuthenticated: 'redirect' },
     { path: '/auth/cadastrar', whenAuthenticated: 'redirect' },
@@ -25,6 +25,10 @@ export function middleware(req: NextRequest) {
     }
 
     if (authToken && path.split('/').includes('servicos')) {
+        return NextResponse.next();
+    }
+
+    if (!authToken && path.split('/').includes('servico')) {
         return NextResponse.next();
     }
 

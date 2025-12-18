@@ -14,8 +14,9 @@ import {
     User,
     Search
 } from 'lucide-react';
-import Header from '@/components/layout/home/Header';
+
 import Footer from '@/components/layout/home/Footer';
+import Header from '@/components/layout/home/Header';
 
 const App = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -167,25 +168,7 @@ const App = () => {
                 </section>
 
                 {/* --- MAP SECTION --- */}
-                <section className="w-full h-80 rounded-xl overflow-hidden shadow-inner bg-gray-200 relative mb-16">
-                    {/* Static Map Image Placeholder */}
-                    <img
-                        src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1600"
-                        alt="Mapa da localização"
-                        className="w-full h-full object-cover opacity-80"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="bg-white/90 p-4 rounded-lg shadow-lg flex items-center gap-3 backdrop-blur-sm">
-                            <div className="bg-red-500 p-2 rounded-full text-white">
-                                <MapPin className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <p className="font-bold text-gray-800">{prestador.endereco}</p>
-                                <p className="text-xs text-gray-500">Angra dos Reis - RJ</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+               
 
             </main>
 

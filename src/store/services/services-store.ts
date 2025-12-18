@@ -26,7 +26,7 @@ interface IProps {
     id_workspace: string;
     id_category: string;
     name: string;
-    image: string | null;       // Pode vir string vazia ou null
+    logo_image: string | null;       // Pode vir string vazia ou null
     cover_image: string | null; // Pode vir string vazia ou null
     content: {
         content: any,
@@ -51,7 +51,7 @@ const stateDefault: IProps = {
     id_workspace: '',
     id_category: '',
     name: '',
-    image: '',
+    logo_image: '',
     cover_image: '',
     content: {
         content: "",
@@ -65,6 +65,7 @@ const stateDefault: IProps = {
         city: '',
         state: ''
     },
+    gallery: []
     // Category: null,
 }
 

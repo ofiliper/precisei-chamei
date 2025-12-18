@@ -158,13 +158,13 @@ export default function DashboardLayout() {
 
                                                             <td className="p-5 text-center align-middle">
                                                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                                                                    <Eye size={14} /> {serv.views || 0}
+                                                                    <Eye size={14} /> {0}
                                                                 </span>
                                                             </td>
 
                                                             <td className="p-5 text-center align-middle">
                                                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                                                    <MousePointerClick size={14} /> {serv.clicks || 0}
+                                                                    <MousePointerClick size={14} /> {0}
                                                                 </span>
                                                             </td>
 
