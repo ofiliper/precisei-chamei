@@ -1,38 +1,51 @@
 import { toast } from '@/hooks/use-toast'
 import { PublicServiceService } from '@/services/api/public-service.service';
-import { ServicesService } from '@/services/api/services.service' // Ajuste o caminho se necessário
-import { serviceListStore } from '@/store/services/service-list-store';
-import { serviceStore } from '@/store/services/services-store';
+import { publicServiceListStore } from '@/store/services/public-service-list.store';
+// import { ServicesService } from '@/services/api/services.service' // Parece não ser usado aqui, comentei
+import { publicServiceStore } from '@/store/services/public-service.store';
 import { useStore } from 'zustand';
 
 const usePublicServices = () => {
 
     const publicServicesService = new PublicServiceService();
-    const servicesList = useStore(serviceListStore);
-    const service = useStore(serviceStore);
 
-    // 1. Listar todos os serviços (readAll)
+    // Instâncias dos stores
+    const publicService = useStore(publicServiceStore);
+    const publicServiceList = useStore(publicServiceListStore);
+
+    // 1. Buscar um serviço (readOne)
     const fetchOneService = async (id: string) => {
         try {
             const request = await publicServicesService.readOne(id);
-            console.log(request)
-            console.log(request)
-            service.fnOnChange("id", request.data.data?.id || null);
-            service.fnOnChange("id_workspace", request.data.data.id_workspace);
-            service.fnOnChange("id_category", request.data.data.id_category);
-            service.fnOnChange("name", request.data.data.name);
-            service.fnOnChange("logo_image", request.data.data.logo_image);
-            service.fnOnChange("cover_image", request.data.data.cover_image);
-            service.fnOnChange("content", request.data.data.content);
-            service.fnOnChange("gallery", request.data.data.gallery);
-            service.fnOnChange("address", request.data.data.Address);
-            service.fnOnChange("fetching", false);
-            return request
+            const data = request.data.data;
+
+            // Se você implementou o fnSetData no store (sugerido anteriormente), use assim:
+            // publicService.fnSetData(data);
+
+            // OU continue usando fnOnChange campo a campo (Corrigido para usar 'publicService'):
+            publicService.fnOnChange("id", data.id || null);
+            publicService.fnOnChange("id_workspace", data.id_workspace);
+            publicService.fnOnChange("id_category", data.id_category);
+            publicService.fnOnChange("name", data.name);
+            publicService.fnOnChange("logo_image", data.logo_image);
+            publicService.fnOnChange("cover_image", data.cover_image);
+            publicService.fnOnChange("content", data.content);
+            publicService.fnOnChange("gallery", data.gallery);
+
+            // Correção: A API retorna 'Address' (maiúsculo), o store espera 'address'
+            publicService.fnOnChange("address", data.Address || data.address);
+
+            // Se houver categoria
+            publicService.fnOnChange("category", data.Category || data.category);
+
+            publicService.fnOnChange("fetching", false);
+            return request;
+
         } catch (error: any) {
             console.log(error)
             toast({
-                title: 'Erro ao carregar serviços',
-                description: 'Não foi possível buscar a lista de serviços.',
+                title: 'Erro ao carregar serviço',
+                description: 'Não foi possível buscar os detalhes do serviço.',
                 variant: 'destructive',
             })
 
@@ -40,13 +53,18 @@ const usePublicServices = () => {
         }
     }
 
+    // 2. Listar todos os serviços (readAll)
     const fetchServices = async () => {
         try {
             const request = await publicServicesService.readAll();
-            console.log(request)
-            servicesList.fnOnChange("services", request.data.data);
-            servicesList.fnOnChange("fetching", false);
-            return request
+
+            // Corrigido para usar 'publicServiceList'
+            // Se você usou o store de lista sugerido anteriormente:
+            publicServiceList.fnOnChange("services", request.data.data);
+            publicServiceList.fnOnChange("fetching", false);
+
+            return request;
+
         } catch (error: any) {
             console.log(error)
             toast({
@@ -58,16 +76,11 @@ const usePublicServices = () => {
             return { ok: false, message: error.message || error, data: null }
         }
     }
-
-    // 2. Criar serviço (create)
-    // Notei que seu service pede { image: any }, mantive a tipagem.
-  
 
     return {
         fetchServices,
         fetchOneService,
-     
     }
 }
 
-export default usePublicServices
+export default usePublicServices;

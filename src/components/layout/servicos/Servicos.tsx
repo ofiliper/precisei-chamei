@@ -627,7 +627,7 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 }
 
 // --- SUB-COMPONENTE: MODAL DE GALERIA ---
-function GalleryModal({ onClose, context }: { onClose: () => void, }) {
+function GalleryModal({ onClose, context }: { onClose: () => void, context: string }) {
     const { fetchImages, uploadImage } = useImages();
     const [images, setImages] = useState<ImageItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);

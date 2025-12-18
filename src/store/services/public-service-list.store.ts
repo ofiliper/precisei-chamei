@@ -26,7 +26,7 @@ export interface IServiceItem {
     gallery: string[];
     createdAt: string;
     updatedAt: string;
-    
+
     // Nota: O JSON fornecido aqui não trouxe os objetos expandidos
     // 'Category' e 'Address', então removi da tipagem. 
     // Se a API de listagem retornar eles, basta adicionar aqui.
@@ -52,77 +52,57 @@ const stateDefault: IServicesData = {
 
 type Store = {
     data: IServicesData
-    
+    errors: Partial<{ [field in keyof IServicesData]: string }>
+
     // Actions
-    fnSetServices: (services: IServiceItem[]) => void
-    fnAddService: (service: IServiceItem) => void
-    fnUpdateService: (id: string, partialService: Partial<IServiceItem>) => void
-    fnRemoveService: (id: string) => void
-    fnSetFetching: (isFetching: boolean) => void
+    fnOnChange: (field: keyof IServicesData, value: any) => void
     fnReset: () => void
+    fnParcialReset: (field: keyof IServicesData) => void
+
+    // Opcional: Action para popular tudo de uma vez quando a API retornar
+    fnSetData: (data: Partial<IServicesData>) => void
 }
 
 export const publicServiceListStore = create<Store>((set) => ({
     data: { ...stateDefault },
+    errors: {},
 
-    // Define a lista completa (ex: após o fetch inicial)
-    fnSetServices: (services) => {
-        set((state) => ({
+    fnOnChange: (field, value) => {
+        set((prevState) => ({
+            ...prevState,
             data: {
-                ...state.data,
-                services: services,
-                fetching: false,
-                count: services.length
+                ...prevState.data,
+                [field]: value
             }
         }))
     },
 
-    // Adiciona um item à lista (ex: criação otimista)
-    fnAddService: (newService) => {
-        set((state) => ({
-            data: {
-                ...state.data,
-                services: [newService, ...state.data.services], // Adiciona no topo
-                count: (state.data.count || 0) + 1
-            }
-        }))
-    },
-
-    // Atualiza um item específico na lista sem recarregar tudo
-    fnUpdateService: (id, partialService) => {
-        set((state) => ({
-            data: {
-                ...state.data,
-                services: state.data.services.map((item) => 
-                    item.id === id ? { ...item, ...partialService } : item
-                )
-            }
-        }))
-    },
-
-    // Remove um item da lista
-    fnRemoveService: (id) => {
-        set((state) => ({
-            data: {
-                ...state.data,
-                services: state.data.services.filter((item) => item.id !== id),
-                count: (state.data.count || 1) - 1
-            }
-        }))
-    },
-
-    // Controla apenas o loading
-    fnSetFetching: (isFetching) => {
-        set((state) => ({
-            data: {
-                ...state.data,
-                fetching: isFetching
-            }
-        }))
-    },
-
-    // Limpa o store
     fnReset: () => {
-        set({ data: { ...stateDefault } })
+        set((prevState) => ({
+            ...prevState,
+            data: { ...stateDefault }
+        }))
+    },
+
+    fnParcialReset: (field) => {
+        set((prevState) => ({
+            ...prevState,
+            data: {
+                ...prevState.data,
+                [field]: stateDefault[field]
+            }
+        }))
+    },
+
+    // Útil para preencher o store assim que o fetch da API termina
+    fnSetData: (apiData) => {
+        set((prevState) => ({
+            ...prevState,
+            data: {
+                ...prevState.data,
+                ...apiData,
+                fetching: false // Garante que o loading pare
+            }
+        }))
     }
 }))
