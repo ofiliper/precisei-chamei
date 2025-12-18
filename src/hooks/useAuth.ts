@@ -6,17 +6,14 @@ import { Cookies } from 'react-cookie'
 import { useStore } from 'zustand'
 
 const useAuth = () => {
-    // const session = useStore(sessionStore)
+
     const authService = new AuthService()
     const cookies = new Cookies();
 
     const fetchLogin = async (data: Signin) => {
         try {
-            const request = await authService.login(data)
 
-            // session.fnOnChange('access_token', request.data.access_token)
-            // session.fnOnChange('expires_in', request.data.expires_in)
-            // session.fnOnChange('user_id', request.data.user_id)
+            const request = await authService.login(data)
 
             cookies.set('userid', request.data.data.token, { path: '/' })
 
@@ -30,71 +27,80 @@ const useAuth = () => {
 
         } catch (error: any) {
             console.log(error)
-            // const emailError = error.details.message.includes(
-            //     'No found user for email ',
-            // )
-
-            // toast({
-            //     title: 'Erro ao fazer login',
-            //     description: translateErrorMessage(
-            //         emailError ? 'No found user for email ' : error.details.message,
-            //     ),
-            //     variant: 'destructive',
-            // })
+            toast({
+                title: 'Erro ao fazer login',
+                description: 'Não foi possível conectar',
+                variant: 'destructive',
+            })
 
             return { ok: false, message: error.message || error, data: null }
+
+        }
+
+    };
+
+    const fetchSignup = async (data: { name: string, email: string, phone: string, password: string }) => {
+        try {
+            const request = await authService.register(data)
+
+            return request
+        } catch (error: any) {
+            toast({
+                title: 'Erro ao criar conta',
+                // description: translateErrorMessage(error.details.message),
+                variant: 'destructive',
+            })
+
+            return { ok: false, message: error.message || error }
         }
     };
 
-    // const fetchSignup = async (data: Signup) => {
-    //     try {
-    //         const request = await authService.register(data)
+    const fetchForgot = async (data: { email: string }) => {
+        try {
+            const request = await authService.forgot(data)
 
-    //         return request
-    //     } catch (error: any) {
-    //         toast({
-    //             title: 'Erro ao criar conta',
-    //             description: translateErrorMessage(error.details.message),
-    //             variant: 'destructive',
-    //         })
+            return request
+        } catch (error: any) {
+            toast({
+                title: 'Erro ao recuperar a senha',
+                // description: translateErrorMessage(error.details.message),
+                variant: 'destructive',
+            })
+            return { ok: false, message: error.message || error }
+        }
+    };
 
-    //         return { ok: false, message: error.message || error }
-    //     }
-    // };
+    const fetchChangePassword = async (data: { email: string, password: string, token: string }) => {
+        try {
+            const request = await authService.updatePassword(data)
 
-    // const fetchForgot = async (data: Forgot) => {
-    //     try {
-    //         const request = await authService.forgotPassword(data.email)
+            return request
+        } catch (error: any) {
+            toast({
+                title: 'Erro ao mudar a sua senha',
+                // description: translateErrorMessage(error.details.message),
+                variant: 'destructive',
+            })
 
-    //         return request
-    //     } catch (error: any) {
-    //         toast({
-    //             title: 'Erro ao recuperar a senha',
-    //             description: translateErrorMessage(error.details.message),
-    //             variant: 'destructive',
-    //         })
-    //         return { ok: false, message: error.message || error }
-    //     }
-    // };
+            return { ok: false, message: error.message || error }
+        }
+    };
 
-    // const fetchChangePassword = async (data: ChangePassword) => {
-    //     try {
-    //         const request = await authService.resetPassword({
-    //             token: data.token,
-    //             password: data.password,
-    //         })
+    const verificationAcc: any = async (data: { email: string, token: string }) => {
+        try {
+            const request = await authService.confirm(data)
 
-    //         return request
-    //     } catch (error: any) {
-    //         toast({
-    //             title: 'Erro ao mudar a sua senha',
-    //             description: translateErrorMessage(error.details.message),
-    //             variant: 'destructive',
-    //         })
+            return request
+        } catch (error: any) {
+            toast({
+                title: 'Erro ao confirmar a sua senha',
+                // description: translateErrorMessage(error.details.message),
+                variant: 'destructive',
+            })
 
-    //         return { ok: false, message: error.message || error }
-    //     }
-    // };
+            return { ok: false, message: error.message || error }
+        }
+    };
 
     // const resendVerificationEmail = async ({ email }: { email: string }) => {
     //     try {
@@ -120,12 +126,12 @@ const useAuth = () => {
 
     return {
         fetchLogin,
-        // fetchSignup,
+        fetchSignup,
+        fetchForgot,
+        fetchChangePassword,
+        verificationAcc,
         // fetchVerifyAcc,
-        // fetchForgot,
-        // fetchChangePassword,
         // fetchSendChangePassEmail,
-        // resendVerificationEmail,
     }
 }
 

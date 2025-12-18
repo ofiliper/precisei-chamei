@@ -68,7 +68,7 @@ export default function Faq() {
   return (
     <DashboardContainer>
       <div className="mx-auto max-w-4xl px-4 py-8">
-        
+
         {/* Cabeçalho */}
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
@@ -111,11 +111,10 @@ export default function Faq() {
                     return (
                       <div
                         key={itemIndex}
-                        className={`overflow-hidden rounded-xl border transition-all duration-200 ${
-                          isOpen
+                        className={`overflow-hidden rounded-xl border transition-all duration-200 ${isOpen
                             ? "border-green-200 bg-green-50/30 shadow-sm"
                             : "border-slate-200 bg-white hover:border-green-200 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <button
                           onClick={() => toggleItem(uniqueId)}
@@ -126,9 +125,8 @@ export default function Faq() {
                           </span>
                           <span className="ml-6 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white border border-slate-200">
                             <svg
-                              className={`h-4 w-4 transform text-slate-500 transition-transform duration-200 ${
-                                isOpen ? "rotate-180" : ""
-                              }`}
+                              className={`h-4 w-4 transform text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                                }`}
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -137,12 +135,11 @@ export default function Faq() {
                             </svg>
                           </span>
                         </button>
-                        
+
                         {/* Resposta com animação simples */}
                         <div
-                          className={`transition-all duration-300 ease-in-out ${
-                            isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                          }`}
+                          className={`transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                            }`}
                         >
                           <div className="border-t border-slate-100 px-6 pb-6 pt-2 text-slate-600">
                             {item.answer}
@@ -174,12 +171,12 @@ export default function Faq() {
             Não encontrou a resposta que procurava? Nossa equipe de suporte está pronta para ajudar você.
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            <button className="rounded-lg bg-green-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+            <a
+              href="https://wa.me/+5524988317770?text=Olá, estou no sistema e tenho uma dúvida"
+              target="_blank"
+              className="rounded-lg bg-green-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900">
               Falar com Suporte
-            </button>
-            <button className="rounded-lg bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
-              Enviar Email
-            </button>
+            </a>
           </div>
         </div>
 

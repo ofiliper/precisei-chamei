@@ -1,23 +1,45 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardContainer from "@/components/shared/Dashboard/Dashboard";
-import { ChevronLeft, ChevronRight, Edit3, Trash2, AlertTriangle, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit3, Trash2, AlertTriangle, X, Eye, MousePointerClick } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import useServices from "@/hooks/useServices";
+import { useStore } from "zustand";
+import { serviceListStore } from "@/store/services/service-list-store";
 
 export default function DashboardLayout() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    // 1. Novo estado para armazenar o serviço que será excluído
+    const [serviceToDelete, setServiceToDelete] = useState<any>(null);
+    
+    const servicesHook = useServices();
+    const services = useStore(serviceListStore);
 
-    const handleConfirmDelete = () => {
+    // 2. Função atualizada para excluir de verdade
+    const handleConfirmDelete = async () => {
+        if (!serviceToDelete) return;
+
+        // Chama a função de delete do hook passando o ID (assumindo que seja _id ou id)
+        await servicesHook.deleteService(serviceToDelete._id || serviceToDelete.id);
+        
+        // Atualiza a lista após excluir
+        await servicesHook.fetchServices();
+
         console.log("Serviço excluído!");
         setIsDeleteModalOpen(false);
+        setServiceToDelete(null);
     };
 
-    // Variantes de animação para reutilização
+    useEffect(() => {
+        servicesHook.fetchServices();
+    }, [])
+
+    // Variantes de animação
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
-        visible: { 
-            opacity: 1, 
+        visible: {
+            opacity: 1,
             y: 0,
             transition: { duration: 0.4, ease: "easeOut" }
         }
@@ -25,13 +47,13 @@ export default function DashboardLayout() {
 
     const modalVariants = {
         hidden: { opacity: 0, scale: 0.95 },
-        visible: { 
-            opacity: 1, 
+        visible: {
+            opacity: 1,
             scale: 1,
             transition: { type: "spring", stiffness: 300, damping: 30 }
         },
-        exit: { 
-            opacity: 0, 
+        exit: {
+            opacity: 0,
             scale: 0.95,
             transition: { duration: 0.2 }
         }
@@ -40,60 +62,34 @@ export default function DashboardLayout() {
     return (
         <>
             <DashboardContainer>
-                {/* Envolvemos o conteúdo principal em um motion.div para entrada suave */}
-                <motion.div 
+                <motion.div
                     initial="hidden"
                     animate="visible"
                     variants={containerVariants}
                     className="max-w-4xl mx-auto pb-10"
                 >
-                    {/* Título */}
-                    <div className="mb-10">
-                        <motion.h1 
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-2xl font-bold text-gray-800 mb-2"
-                        >
-                            Dashboard
-                        </motion.h1>
-                        <motion.p 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-gray-500"
-                        >
-                            Acompanhe as métricas de seu anúncio.
-                        </motion.p>
-                    </div>
-
-                    {/* Cards de Métricas */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 max-w-3xl">
-                        <motion.div 
-                            whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
-                            className="bg-[#1f2d0e] rounded-[2rem] p-10 text-white min-h-[180px] flex flex-col justify-center shadow-lg relative overflow-hidden cursor-default"
-                        >
-                            <div className="relative z-10">
-                                <p className="text-sm font-medium opacity-80 mb-3 uppercase tracking-wider">Total de visitas</p>
-                                <p className="text-6xl font-semibold tracking-tight">10.242</p>
-                            </div>
-                        </motion.div>
-
-                        <motion.div 
-                            whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05)" }}
-                            className="bg-white rounded-[2rem] p-10 text-gray-800 min-h-[180px] flex flex-col justify-center shadow-sm relative cursor-default"
-                        >
-                            <p className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Total de cliques no link</p>
-                            <p className="text-6xl font-semibold text-gray-500 tracking-tight hover:text-gray-700 transition-colors">682</p>
-                        </motion.div>
-                    </div>
-
                     {/* Seção Serviços */}
                     <div className="max-w-6xl">
                         <div className="flex flex-col sm:flex-row justify-between items-end mb-6 border-b border-gray-200 pb-4">
-                            <h2 className="text-3xl font-bold text-gray-700">Serviços</h2>
-                            
-                            <motion.a 
+                            <div>
+                                <motion.h1
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-2xl font-bold text-gray-800 mb-2"
+                                >
+                                    Serviços
+                                </motion.h1>
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-gray-500"
+                                >
+                                    Acompanhe as métricas de seu anúncio.
+                                </motion.p>
+                            </div>
+                            <motion.a
                                 href="/dashboard/servicos"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -104,7 +100,7 @@ export default function DashboardLayout() {
                         </div>
 
                         {/* Tabela */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
@@ -115,44 +111,70 @@ export default function DashboardLayout() {
                                     <thead>
                                         <tr>
                                             <th className="p-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">Nome</th>
+                                            <th className="p-6 text-xs font-semibold text-gray-400 text-center uppercase tracking-wider">Visualizações</th>
+                                            <th className="p-6 text-xs font-semibold text-gray-400 text-center uppercase tracking-wider">Cliques em contato</th>
                                             <th className="p-6 text-xs font-semibold text-gray-400 text-center uppercase tracking-wider">Última atualização</th>
                                             <th className="p-6 text-xs font-semibold text-gray-400 text-right uppercase tracking-wider">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-600">
-                                        <tr className="border-t border-gray-50 hover:bg-gray-50 transition-colors">
-                                            <td className="p-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden p-1 shadow-sm">
-                                                        <img src="https://i.pravatar.cc/150?img=30" alt="Service" className="object-cover w-full h-full rounded-xl" />
-                                                    </div>
-                                                    <span className="font-bold text-gray-700 text-lg">Selina Manicure</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-6 text-center font-medium">20 de out.</td>
-                                            <td className="p-6">
-                                                <div className="flex items-center justify-end gap-6">
-                                                    <motion.a 
-                                                        whileHover={{ scale: 1.1, color: "#2c8b96" }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        href="/dashboard/servicos" 
-                                                        className="flex items-center gap-2 text-sm text-gray-500 font-medium transition-colors"
-                                                    >
-                                                        <Edit3 size={18} />
-                                                        Editar
-                                                    </motion.a>
-                                                    
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1, color: "#ef4444" }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={() => setIsDeleteModalOpen(true)}
-                                                        className="text-gray-400 transition-colors"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </motion.button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {
+                                            services.data.services &&
+                                            services.data.services.length > 0 &&
+                                            services.data.services.map((serv, _) => {
+                                                return (
+                                                    <tr key={_} className="border-t border-gray-50 hover:bg-gray-50 transition-colors">
+                                                        <td className="p-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden p-1 shadow-sm">
+                                                                    <img src="https://i.pravatar.cc/150?img=30" alt="Service" className="object-cover w-full h-full rounded-xl" />
+                                                                </div>
+                                                                <span className="font-bold text-gray-700 text-lg">{serv.name}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-6 text-center">
+                                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                                                <Eye size={14} strokeWidth={2.5} />
+                                                                24
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-6 text-center">
+                                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                                                                <MousePointerClick size={14} strokeWidth={2.5} />
+                                                                12
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-6 text-center font-medium">{new Date(serv.createdAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}</td>
+                                                        <td className="p-6">
+                                                            <div className="flex items-center justify-end gap-6">
+                                                                <motion.a
+                                                                    whileHover={{ scale: 1.1, color: "#2c8b96" }}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    href="/dashboard/servicos"
+                                                                    className="flex items-center gap-2 text-sm text-gray-500 font-medium transition-colors"
+                                                                >
+                                                                    <Edit3 size={18} />
+                                                                    Editar
+                                                                </motion.a>
+
+                                                                <motion.button
+                                                                    whileHover={{ scale: 1.1, color: "#ef4444" }}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    // 3. Ao clicar, salvamos o objeto 'serv' no state
+                                                                    onClick={() => {
+                                                                        setServiceToDelete(serv);
+                                                                        setIsDeleteModalOpen(true);
+                                                                    }}
+                                                                    className="text-gray-400 transition-colors"
+                                                                >
+                                                                    <Trash2 size={18} />
+                                                                </motion.button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -171,11 +193,10 @@ export default function DashboardLayout() {
                 </motion.div>
             </DashboardContainer>
 
-            {/* --- MODAL DE EXCLUSÃO (Com AnimatePresence) --- */}
+            {/* --- MODAL DE EXCLUSÃO --- */}
             <AnimatePresence>
                 {isDeleteModalOpen && (
                     <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -184,8 +205,7 @@ export default function DashboardLayout() {
                             onClick={() => setIsDeleteModalOpen(false)}
                         />
 
-                        {/* Conteúdo do Modal */}
-                        <motion.div 
+                        <motion.div
                             variants={modalVariants}
                             initial="hidden"
                             animate="visible"
@@ -200,7 +220,7 @@ export default function DashboardLayout() {
                             </button>
 
                             <div className="flex flex-col items-center text-center">
-                                <motion.div 
+                                <motion.div
                                     initial={{ scale: 0, rotate: -45 }}
                                     animate={{ scale: 1, rotate: 0 }}
                                     transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
@@ -212,8 +232,9 @@ export default function DashboardLayout() {
                                 </motion.div>
 
                                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Excluir serviço?</h3>
+                                {/* 4. Mostramos o nome dinâmico do serviço */}
                                 <p className="text-gray-500 mb-8 leading-relaxed">
-                                    Tem certeza que deseja remover o serviço <span className="font-semibold text-gray-700">"Selina Manicure"</span>? <br />
+                                    Tem certeza que deseja remover o serviço <span className="font-semibold text-gray-700">"{serviceToDelete?.name}"</span>? <br />
                                     Essa ação não poderá ser desfeita.
                                 </p>
 

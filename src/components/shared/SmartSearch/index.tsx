@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, ChevronDown, Check, MapPin, Search as SearchIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useStore } from 'zustand';
+import { categoryStore } from '@/store/category/category-store';
 
 // Lista de Categorias Demo
 const categorias = [
@@ -21,8 +23,9 @@ const categorias = [
 export default function SearchBarCaprichado() {
     // Estados
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<any>({});
     const [categorySearch, setCategorySearch] = useState(""); // Busca interna do dropdown
+    const categoryList = useStore(categoryStore);
 
     // Ref para fechar ao clicar fora
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -39,25 +42,29 @@ export default function SearchBarCaprichado() {
     }, []);
 
     // Lógica de Filtro
-    const filteredCategories = categorias.filter((cat) =>
-        cat.toLowerCase().includes(categorySearch.toLowerCase())
-    );
+    const filteredCategories = categoryList.data.rows!.length > 0
+        ? categoryList.data.rows!.filter((cat) => ({
+            name: cat.name.toLowerCase().includes(categorySearch.toLowerCase()),
+            id: cat.id
+        })
+        )
+        : []
 
     return (
 
 
-        <div className="flex items-center relative w-[200px] border-b md:border-b-0 md:border-r border-slate-100" ref={wrapperRef}>
+        <div className="flex items-center relative md:w-[200px] border-b md:border-b-0 md:border-r border-slate-100" ref={wrapperRef}>
 
             {/* O Botão Visível (Trigger) */}
             <div
                 className="flex items-center justify-between h-8 cursor-pointer hover:bg-slate-50 transition-colors rounded-l-xl group w-full"
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
             >
-                <span className={`text-sm font-medium truncate flex-1 ${selectedCategory ? 'text-slate-800' : 'text-slate-500'}`}>
-                    {selectedCategory || "Selecionar Categoria"}
+                <span className={`text-sm font-medium truncate flex-1 ${selectedCategory.name ? 'text-slate-800' : 'text-slate-500'}`}>
+                    {selectedCategory.name || "Selecionar Categoria"}
                 </span>
 
-                <div className={`p-1.5 rounded-md mr-3 transition-colors ${selectedCategory ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                <div className={`p-1.5 rounded-md mr-3 transition-colors ${selectedCategory.name ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`} />
                 </div>
             </div>
@@ -95,17 +102,17 @@ export default function SearchBarCaprichado() {
                                         key={idx}
                                         whileHover={{ backgroundColor: "rgb(249 250 251)" }}
                                         onClick={() => {
-                                            setSelectedCategory(cat);
+                                            setSelectedCategory({id: cat.id, name: cat.name});
                                             setIsCategoryOpen(false);
                                             setCategorySearch('');
                                         }}
                                         className={`
                                     flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors mb-1
-                                    ${selectedCategory === cat ? 'bg-emerald-50 text-emerald-700 font-medium' : 'text-slate-600'}
+                                    ${selectedCategory.id === cat.id ? 'bg-emerald-50 text-emerald-700 font-medium' : 'text-slate-600'}
                                 `}
                                     >
-                                        {cat}
-                                        {selectedCategory === cat && <Check size={16} className="text-emerald-600" />}
+                                        {cat.name}
+                                        {selectedCategory.id === cat.id && <Check size={16} className="text-emerald-600" />}
                                     </motion.li>
                                 ))
                             ) : (

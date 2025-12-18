@@ -5,8 +5,17 @@ import { Search, MapPin, ChevronDown, Instagram, Facebook, Youtube, ArrowRight, 
 import Header from "@/components/layout/home/Header";
 import Footer from "@/components/layout/home/Footer";
 import SmartSearch from "@/components/shared/SmartSearch";
+import { useEffect } from "react";
+import useCategory from "@/hooks/useCategory";
 
 function App() {
+
+    const hookCategory = useCategory();
+
+    useEffect(() => {
+        hookCategory.fetchCategories();
+    }, [])
+
     return (
         <main className="min-h-screen font-sans text-slate-600">
             {/*HEADER */}
@@ -98,7 +107,7 @@ function App() {
 
                 <div className="grid md:grid-cols-2 gap-4 max-w-5xl mx-auto">
                     {/* Card Prestador */}
-                    <div className="rounded-2xl p-8 flex flex-row items-center relative overflow-hidden group">
+                    <div className="rounded-2xl p-8 flex flex-col md:flex-row items-center relative overflow-hidden group">
                         {/* Illustration Placeholder */}
                         <div className="bg-emerald-200 rounded-full mb-6 flex items-center justify-center">
                             <img src="service.png" className="w-full" />
@@ -115,7 +124,7 @@ function App() {
                     </div>
 
                     {/* Card Cliente */}
-                    <div className="rounded-2xl p-8 flex flex-row items-center relative overflow-hidden">
+                    <div className="rounded-2xl p-8 flex flex-col md:flex-row items-center relative overflow-hidden">
                         {/* Illustration Placeholder */}
                         <div className="rounded-full mb-6 flex items-center justify-center">
                             <img src="user.png" className="w-full" />

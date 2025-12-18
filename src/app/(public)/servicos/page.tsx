@@ -41,13 +41,15 @@ const App = () => {
         ]
     };
 
-    const scroll = (direction) => {
+    const scroll = (direction: string) => {
         if (scrollRef.current) {
             const { current } = scrollRef;
             const scrollAmount = 300;
             if (direction === 'left') {
+                //@ts-ignore
                 current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
             } else {
+                //@ts-ignore
                 current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
             }
         }

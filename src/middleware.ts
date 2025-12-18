@@ -19,8 +19,12 @@ export function middleware(req: NextRequest) {
     const publicRoute = publicRoutes.find(route => route.path === path);
     const authToken = req.cookies.get('userid')?.value;
 
-    return NextResponse.next();
     if (path === '/' || path === 'manifest.json') {
+        return NextResponse.next();
+    }
+
+    if (authToken && path.split('/').includes('servicos')) {
+        return NextResponse.next();
     }
 
     if (!authToken && publicRoute) {
@@ -31,6 +35,7 @@ export function middleware(req: NextRequest) {
         redirectUrl.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE;
         return NextResponse.redirect(redirectUrl);
     }
+
 
     if (authToken && publicRoute && publicRoute.whenAuthenticated === 'redirect') {
         const redirectUrl = req.nextUrl.clone();
