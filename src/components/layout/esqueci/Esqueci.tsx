@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function ForgotPasswordPage() {
     const { fetchForgot } = useAuth();
-    
+
     // Estados
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!email) {
             toast({
                 title: "Campo obrigatório",
@@ -50,15 +50,15 @@ export default function ForgotPasswordPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#f4f4f7] p-4">
-            
-            <motion.div 
+
+            <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md"
             >
                 {/* Logo ou Brand (Opcional) */}
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Precisei Chamei</h1>
+                    <img src="/precisei-chamei.svg" className="w-[90px] mx-auto" />
                 </div>
 
                 <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden relative min-h-[400px]">
@@ -135,7 +135,7 @@ export default function ForgotPasswordPage() {
                                     exit="exit"
                                     className="text-center py-4"
                                 >
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
                                         transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
@@ -147,11 +147,11 @@ export default function ForgotPasswordPage() {
                                     <h2 className="text-2xl font-bold text-gray-800 mb-4">
                                         Verifique seu e-mail
                                     </h2>
-                                    
+
                                     <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-                                        Enviamos um link de recuperação para <br/>
+                                        Enviamos um link de recuperação para <br />
                                         <span className="font-semibold text-gray-800">{email}</span>.
-                                        <br/><br/>
+                                        <br /><br />
                                         Clique no link para criar uma nova senha.
                                     </p>
 
@@ -166,8 +166,8 @@ export default function ForgotPasswordPage() {
 
                         {/* Rodapé do Card (Link de Voltar) */}
                         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                            <Link 
-                                href="/auth/login" 
+                            <Link
+                                href="/auth/login"
                                 className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-[#319795] transition-colors"
                             >
                                 <ArrowLeft size={16} />
@@ -176,11 +176,11 @@ export default function ForgotPasswordPage() {
                         </div>
 
                     </div>
-                    
+
                     {/* Barra decorativa no topo */}
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#319795] to-[#40A56A]" />
                 </div>
-                
+
                 {/* Copyright Footer */}
                 <p className="text-center text-gray-400 text-xs mt-8">
                     &copy; {new Date().getFullYear()} Precisei Chamei. Todos os direitos reservados.

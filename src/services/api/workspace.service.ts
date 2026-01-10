@@ -22,4 +22,17 @@ export class WorkspaceService extends HttpService {
         return request
     };
 
+    async readAll() {
+        const request = await fnFetch ({
+            url: `${this.defaultUrl}/`,
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${this.cookies.get('userid')}`,
+                // Workspace: `${this.cookies.get('workspace')}`
+            }
+        })
+
+        return request
+    };
+
 }

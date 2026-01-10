@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   // 1. Instanciar o hook no topo
-  const { fetchLogin } = useAuth(); 
+  const { fetchLogin } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -23,12 +23,12 @@ export default function LoginPage() {
     e?.preventDefault(); // Previne o recarregamento da página
 
     if (!email || !password) {
-        toast({
-            title: "Campos obrigatórios",
-            description: "Por favor, preencha e-mail e senha.",
-            variant: "destructive"
-        });
-        return;
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha e-mail e senha.",
+        variant: "destructive"
+      });
+      return;
     }
 
     setLoading(true);
@@ -40,15 +40,15 @@ export default function LoginPage() {
 
     // Verifica se houve sucesso (baseado no retorno do seu hook useAuth)
     if (response && response.ok !== false) {
-        // O hook já salva o cookie e exibe o toast de sucesso
-        router.push('/dashboard');
+      // O hook já salva o cookie e exibe o toast de sucesso
+      router.push('/dashboard');
     }
   }
 
   return (
     <div className="flex min-h-screen w-full bg-gray-50 font-sans">
       <Toaster />
-      
+
       {/* Lado Esquerdo - Formulário */}
       <div className="flex w-full flex-col justify-center px-8 sm:px-12 lg:w-[40%] lg:px-20 xl:px-24">
 
@@ -64,7 +64,7 @@ export default function LoginPage() {
             Que bom te ver novamente!
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-             Faça login para gerenciar seus serviços.
+            Faça login para gerenciar seus serviços.
           </p>
         </div>
 
@@ -113,20 +113,20 @@ export default function LoginPage() {
             <a href="/auth/esqueci" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
               Esqueceu a senha?
             </a>
-            
+
             <button
-                type="submit" // Mudado para submit para funcionar com ENTER
-                disabled={loading}
-                className="inline-flex items-center justify-center rounded bg-[#2E8B57] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#257045] disabled:cursor-not-allowed disabled:bg-emerald-400 min-w-[140px]"
+              type="submit" // Mudado para submit para funcionar com ENTER
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded bg-[#2E8B57] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#257045] disabled:cursor-not-allowed disabled:bg-emerald-400 min-w-[140px]"
             >
-                {loading ? (
-                    <>
-                        <Loader2 className="animate-spin mr-2" size={18} />
-                        Entrando...
-                    </>
-                ) : (
-                    "Acessar conta"
-                )}
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2" size={18} />
+                  Entrando...
+                </>
+              ) : (
+                "Acessar conta"
+              )}
             </button>
           </div>
         </form>

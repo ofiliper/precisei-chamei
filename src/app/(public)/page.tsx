@@ -179,12 +179,8 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
             {/* Imagem do Card (ESTÁTICA, mantendo layout anterior) */}
             <div className={`w-full md:w-48 h-40 ${imageColor} rounded-lg flex-shrink-0 relative overflow-hidden`}>
                 {/* Placeholder image idêntico ao original */}
-                <div className="w-full h-full flex items-center justify-center text-slate-400 bg-gray-200/50 overflow-hidden">
-                    <img
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${service.id_workspace}/${service.logo_image}`}
-                        alt={service.name}
-                        className="w-full h-full object-cover"
-                    />
+                <div className="w-full h-full flex items-center justify-center text-slate-400 bg-gray-200/50">
+                    IMG
                 </div>
             </div>
 
@@ -202,11 +198,9 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
                             {description}
                         </p>
                     </div>
-                    <a
-                        href={`/servico/${service.id}`}
-                        className="hidden  md:flex text-center justify-center bg-gradient-to-r from-[#2080B3] to-[#40A56A] text-white text-xs font-semibold px-4 py-2 rounded hover:opacity-90 transition w-[120px]">
+                    <button className="hidden md:block bg-gradient-to-r from-[#2080B3] to-[#40A56A] text-white text-xs font-semibold px-4 py-2 rounded hover:opacity-90 transition w-[120px]">
                         Ver mais
-                    </a>
+                    </button>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-slate-400 mt-auto">
@@ -221,11 +215,9 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
                 </div>
 
                 {/* Mobile Button only */}
-                <a
-                    href={`/servico/${service.id}`}
-                    className="md:hidden mt-4 w-full bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded hover:bg-emerald-600 transition">
+                <button className="md:hidden mt-4 w-full bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded hover:bg-emerald-600 transition">
                     Ver mais
-                </a>
+                </button>
             </div>
         </div>
     )
