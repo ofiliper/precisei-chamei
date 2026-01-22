@@ -4,7 +4,7 @@ import { MapPin, Frown, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from "@/components/layout/home/Header";
 import Footer from "@/components/layout/home/Footer";
 import SmartSearch from "@/components/shared/SmartSearch";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react"; // Adicionado Suspense
 import { useSearchParams, useRouter } from "next/navigation";
 import useCategory from "@/hooks/useCategory";
 import usePublicServices from "@/hooks/usePublicServices";
@@ -18,7 +18,8 @@ const stripHtml = (html: string) => {
     return tmp.textContent || tmp.innerText || "";
 }
 
-function App() {
+// 1. O componente lógico agora se chama SearchContent
+function SearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const hookCategory = useCategory();
@@ -138,8 +139,8 @@ function App() {
                                     key={pageNum}
                                     onClick={() => handlePageChange(pageNum)}
                                     className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-sm font-medium transition ${meta.page === pageNum
-                                        ? 'bg-emerald-500 text-white shadow-md'
-                                        : 'border border-gray-50 text-slate-500 hover:bg-gray-50'
+                                            ? 'bg-emerald-500 text-white shadow-md'
+                                            : 'border border-gray-50 text-slate-500 hover:bg-gray-50'
                                         }`}
                                 >
                                     {pageNum}
@@ -160,6 +161,22 @@ function App() {
 
             <Footer />
         </main>
+    );
+}
+
+// 2. Componente padrão que faz o encapsulamento no Suspense
+export default function App() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        }>
+            <SearchContent />
+        </Suspense>
     );
 }
 
@@ -236,5 +253,3 @@ function SkeletonCard() {
         </div>
     );
 }
-
-export default App;
