@@ -18,6 +18,8 @@ const useServices = () => {
             service.fnOnChange("id", request.data.data?.id || null);
             service.fnOnChange("id_workspace", request.data.data.id_workspace);
             service.fnOnChange("id_category", request.data.data.id_category);
+            service.fnOnChange("id_subcategory", request.data.data.id_subcategory);
+            service.fnOnChange("whatsapp", request.data.data.whatsapp);
             service.fnOnChange("name", request.data.data.name);
             service.fnOnChange("logo_image", request.data.data.logo_image);
             service.fnOnChange("cover_image", request.data.data.cover_image);

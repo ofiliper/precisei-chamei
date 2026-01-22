@@ -1,38 +1,20 @@
 import { create } from 'zustand'
 
-// 1. Interface para a Categoria (que vem aninhada)
-export interface IServiceCategory {
-    id: string;
-    name: string;
-}
-
-// 2. Interface para o objeto principal de dados (o conteúdo de "data")
-export interface IServiceItem {
-    id: string;
-    id_workspace: string;
-    id_category: string;
-    name: string;
-    view_content_count: number; 
-    logo_image: string | null; // Pode vir string vazia ou null
-    contact_whatsapp_count: number | null;
-    image: string | null;       // Pode vir string vazia ou null
-    cover_image: string | null; // Pode vir string vazia ou null
-    content: string | null;
-    createdAt: string;
-    updatedAt: string;
-}
-
 interface IProps {
-    imageSelectedIndex: number;
     fetching: boolean;
-    services: IServiceItem[] | null;
- 
+    id: string;
+    name: string;
+    Subcategories: {
+        id: string,
+        name: string
+    }[]
 }
 
 const stateDefault: IProps = {
     fetching: true,
-    imageSelectedIndex: -1,
-    services: [],
+    id: '',
+    name: '',
+    Subcategories: [],
 }
 
 type Store = {
@@ -43,7 +25,7 @@ type Store = {
     fnParcialReset: (field: keyof IProps) => void
 }
 
-export const serviceListStore = create<Store>((set, get) => ({
+export const subcategoryStore = create < Store > ((set, get) => ({
     data: { ...stateDefault },
     errors: {},
     fnOnChange: (field, value) => {

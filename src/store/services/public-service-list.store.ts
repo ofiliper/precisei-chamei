@@ -26,7 +26,6 @@ export interface IServiceItem {
     gallery: string[];
     createdAt: string;
     updatedAt: string;
-
     // Nota: O JSON fornecido aqui não trouxe os objetos expandidos
     // 'Category' e 'Address', então removi da tipagem. 
     // Se a API de listagem retornar eles, basta adicionar aqui.
@@ -38,6 +37,13 @@ interface IServicesData {
     fetching: boolean;
     services: IServiceItem[]; // Array contendo a lista
     count?: number; // Opcional: útil se a API retornar total de registros para paginação
+    pagination: number
+    meta: {
+        total_items: number,
+        total_pages: number
+        page: number
+        page_size: number
+    }
 }
 
 // --- Estado Inicial ---
@@ -45,7 +51,14 @@ interface IServicesData {
 const stateDefault: IServicesData = {
     fetching: true,
     services: [],
-    count: 0
+    count: 0,
+    pagination: 1,
+    meta: {
+        total_items: 0,
+        total_pages: 0,
+        page: 1,
+        page_size: 10
+    }
 }
 
 // --- Definição do Store ---

@@ -5,6 +5,8 @@ const publicRoutes = [
     { path: '/' },
     { path: '/manifest.json' },
     { path: '/servico' },
+    { path: '/teste' },
+    { path: '/buscar' },
     { path: '/auth/login', whenAuthenticated: 'redirect' },
     { path: '/auth/confirmar', whenAuthenticated: 'redirect' },
     { path: '/auth/cadastrar', whenAuthenticated: 'redirect' },
@@ -20,7 +22,7 @@ export function middleware(req: NextRequest) {
     const publicRoute = publicRoutes.find(route => route.path === path);
     const authToken = req.cookies.get('userid')?.value;
 
-    if (path === '/' || path === 'manifest.json') {
+    if (path === '/' || path === '/manifest.json') {
         return NextResponse.next();
     }
 

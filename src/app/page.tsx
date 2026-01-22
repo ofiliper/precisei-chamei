@@ -23,12 +23,32 @@ function App() {
     const publicServiceHook = usePublicServices();
     const publicServicesList = useStore(publicServiceListStore);
 
+
+    // Pegamos os dados com valores padrão para evitar erros de undefined
+    const { services = [], fetching = false, meta = { page: 1, total_pages: 0 } } = publicServicesList.data;
+
+    const PAGE_SIZE = 10;
+
     useEffect(() => {
         hookCategory.fetchCategories();
-        publicServiceHook.fetchServices();
+        // Carregue 10 itens (PAGE_SIZE) na primeira carga, não apenas 1
+        publicServiceHook.fetchServices({ page_size: PAGE_SIZE, current_page: 1 });
     }, []);
 
-    const { services, fetching } = publicServicesList.data;
+    const handleLoadMore = () => {
+        // Proteção: meta?.page pode ser undefined no início
+        if (meta && meta.page < meta.total_pages) {
+            const nextPage = meta.page + 1;
+
+            publicServiceHook.fetchServices({
+                page_size: PAGE_SIZE,
+                current_page: nextPage,
+                append: true
+            });
+        }
+    };
+
+    const hasMore = meta.page < meta.total_pages;
 
     return (
         <main className="min-h-screen font-sans text-slate-600">
@@ -46,21 +66,9 @@ function App() {
 
                 {/* Search Bar */}
                 <div className="max-w-3xl mx-auto bg-white p-2 rounded-lg shadow-sm flex flex-col md:flex-row gap-2 border border-gray-100">
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-3 text-gray-300 w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder="Pesquisar"
-                            className="w-full pl-10 pr-4 py-2 outline-none text-slate-600 placeholder-gray-300 rounded-md"
-                        />
-                    </div>
-                    <div className="w-px bg-gray-200 hidden md:block"></div>
-                    <div className="flex-1">
-                        <SmartSearch />
-                    </div>
-                    <button className="bg-gradient-to-r from-[#2080B3] to-[#40A56A] hover:bg-emerald-600 text-white px-8 py-2 rounded-md font-medium transition">
-                        Buscar
-                    </button>
+
+                    <SmartSearch />
+
                 </div>
             </section>
 
@@ -100,13 +108,22 @@ function App() {
                     )}
                 </div>
 
-                {/* Botão Ver Mais */}
-                {!fetching && services.length > 0 && (
+                {/* Controle do Botão Ver Mais */}
+                {!fetching && hasMore && (
                     <div className="text-center mt-8">
-                        <button className="text-emerald-600 text-sm font-medium border border-gray-200 bg-white px-6 py-2 rounded-full hover:bg-emerald-50 transition">
+                        <button
+                            onClick={handleLoadMore}
+                            className="text-emerald-600 text-sm font-medium border border-gray-200 bg-white px-6 py-2 rounded-full hover:bg-emerald-50 transition"
+                        >
                             Ver mais serviços
                         </button>
                     </div>
+                )}
+
+                {!hasMore && services.length > 0 && (
+                    <p className="text-center text-slate-400 text-[10px] mt-8 uppercase tracking-widest">
+                        Fim da lista
+                    </p>
                 )}
             </section>
 
@@ -167,6 +184,7 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
     // Extração dos dados
     const description = stripHtml(service.content?.content || "Sem descrição disponível.");
     const categoryName = service.Category?.name || "Geral";
+    const subcategoryName = service.Subcategory?.name || "Geral";
     const neighborhood = service.Address?.neighborhood;
     const city = service.Address?.city;
     // Monta o texto de localização
@@ -178,19 +196,29 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 transition hover:shadow-md hover:border-emerald-500/20 cursor-pointer group">
             {/* Imagem do Card (ESTÁTICA, mantendo layout anterior) */}
             <div className={`w-full md:w-48 h-40 ${imageColor} rounded-lg flex-shrink-0 relative overflow-hidden`}>
-                {/* Placeholder image idêntico ao original */}
-                <div className="w-full h-full flex items-center justify-center text-slate-400 bg-gray-200/50">
-                    IMG
-                </div>
+                <img
+                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${service.id_workspace}/${service.logo_image}`}
+                    alt={service.name || "Imagem do serviço"}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                        // Fallback: se a imagem quebrar, esconde ela para mostrar a cor de fundo
+                        e.currentTarget.style.display = 'none';
+                    }}
+                />
             </div>
 
             {/* Conteúdo (DADOS REAIS) */}
             <div className="flex-1 flex flex-col justify-center">
                 <div className="flex items-start justify-between">
                     <div>
-                        <span className="inline-block bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded mb-2 uppercase tracking-wide group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                            {categoryName}
-                        </span>
+                        <div className="flex gap-2">
+                            <span className="inline-block bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded mb-2 uppercase tracking-wide group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                {categoryName}
+                            </span>
+                            <span className="inline-block bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded mb-2 uppercase tracking-wide group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                {subcategoryName}
+                            </span>
+                        </div>
                         <h3 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-emerald-700 transition-colors">
                             {service.name}
                         </h3>
@@ -198,16 +226,20 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
                             {description}
                         </p>
                     </div>
-                    <button className="hidden md:block bg-gradient-to-r from-[#2080B3] to-[#40A56A] text-white text-xs font-semibold px-4 py-2 rounded hover:opacity-90 transition w-[120px]">
+                    <a
+                        href={`servico/${service.id}`}
+                        className="hidden text-center md:block bg-gradient-to-r from-[#2080B3] to-[#40A56A] text-white text-xs font-semibold px-4 py-2 rounded hover:opacity-90 transition w-[120px]">
                         Ver mais
-                    </button>
+                    </a>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-slate-400 mt-auto">
-                    <div className="flex items-center gap-1">
-                        <MapPin size={14} className="group-hover:text-[#40A56A] transition-colors" />
-                        <span>{distanceMock}</span>
-                    </div>
+                    {service.distance && (
+                        <div className="flex items-center gap-1">
+                            <MapPin size={14} className="group-hover:text-[#40A56A] transition-colors" />
+                            <span>{service.distance}</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-1">
                         <MapPin size={14} className="group-hover:text-[#40A56A] transition-colors" />
                         <span className="capitalize line-clamp-1">{locationText}</span>
@@ -215,9 +247,11 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
                 </div>
 
                 {/* Mobile Button only */}
-                <button className="md:hidden mt-4 w-full bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded hover:bg-emerald-600 transition">
+                <a
+                    href={`servico/${service.id}`}
+                    className="md:hidden mt-4 w-full bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded hover:bg-emerald-600 transition">
                     Ver mais
-                </button>
+                </a>
             </div>
         </div>
     )

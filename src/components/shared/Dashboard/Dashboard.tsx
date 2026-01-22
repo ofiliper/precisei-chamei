@@ -86,7 +86,7 @@ export default function DashboardContainer({ children }: { children: React.React
                     <DashboardSidebar
                         isSidebarOpen={isSidebarOpen}
                         sidebarCallback={setIsSidebarOpen}
-                        onSwitchWorkspace={handleSwitchWorkspace}
+                        // onSwitchWorkspace={handleSwitchWorkspace}
                     />
                 </div>
 

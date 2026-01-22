@@ -25,6 +25,8 @@ interface IProps {
     id: string;
     id_workspace: string;
     id_category: string;
+    id_subcategory: string;
+    whatsapp: string;
     name: string;
     logo_image: string | null;       // Pode vir string vazia ou null
     cover_image: string | null; // Pode vir string vazia ou null
@@ -48,8 +50,10 @@ interface IProps {
 const stateDefault: IProps = {
     fetching: true,
     id: '',
+    whatsapp: '',
     id_workspace: '',
     id_category: '',
+    id_subcategory: '',
     name: '',
     logo_image: '',
     cover_image: '',

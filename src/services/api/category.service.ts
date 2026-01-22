@@ -22,6 +22,19 @@ export class CategoryServices extends HttpService {
         })
         return request;
     };
+   
+    async read(id_category: string) {
+        const request = await fnFetch({
+            url: `${this.defaultUrl}/${id_category}`,
+            method: 'GET',
+            // body: data,
+            // headers: {
+            //     Authorization: `Bearer ${this.cookies.get('userid')}`,
+            //     Workspace: `${this.cookies.get('workspace')}`
+            // }
+        })
+        return request;
+    };
 
      
 

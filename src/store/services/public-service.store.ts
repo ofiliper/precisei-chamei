@@ -44,7 +44,7 @@ interface IServiceData {
 
     // Objeto aninhado conforme API
     content: IServiceContent;
-
+    whatsapp: string
     // Array de strings conforme API
     gallery: string[];
 
@@ -76,6 +76,7 @@ const stateDefault: IServiceData = {
             instagram: ""
         }
     },
+    whatsapp: '',
     gallery: [],
     address: {
         street: '',

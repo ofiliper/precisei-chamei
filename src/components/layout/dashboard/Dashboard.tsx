@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DashboardContainer from "@/components/shared/Dashboard/Dashboard";
-import { ChevronLeft, ChevronRight, Edit3, Trash2, AlertTriangle, X, Eye, MousePointerClick, ImageOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit3, Trash2, AlertTriangle, X, Eye, MousePointerClick, ImageOff, Share, Link } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useServices from "@/hooks/useServices";
 import { useStore } from "zustand";
@@ -134,9 +134,9 @@ export default function DashboardLayout() {
                                                                 <div className="flex items-center gap-4">
                                                                     <div className="relative w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
                                                                         {/* 3. Ternário de Imagem: Se tem imagem, mostra IMG, senão mostra Ícone */}
-                                                                        {serv.image ? (
+                                                                        {serv.logo_image ? (
                                                                             <img
-                                                                                src={serv.image}
+                                                                                src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${serv.id_workspace}/${serv.logo_image}`}
                                                                                 alt={serv.name}
                                                                                 className="object-cover w-full h-full"
                                                                             />
@@ -146,9 +146,11 @@ export default function DashboardLayout() {
                                                                     </div>
 
                                                                     <div className="flex flex-col">
-                                                                        <span className="font-semibold text-gray-900 text-base group-hover:text-emerald-600 transition-colors">
-                                                                            {serv.name}
-                                                                        </span>
+                                                                        <a href={`./servico/${serv.id}`} target="_blank">
+                                                                            <span className="font-semibold text-gray-900 text-base group-hover:text-emerald-600 transition-colors">
+                                                                                {serv.name} <Link size={14} className="inline-block ml-1 mb-0.5 text-gray-400" />
+                                                                            </span>
+                                                                        </a>
                                                                         {/* <span className="text-xs text-gray-400">
                                                                             {serv.id_category || `ID: ${serv.id?.slice(0, 6) || "..."}`}
                                                                         </span> */}
@@ -158,13 +160,13 @@ export default function DashboardLayout() {
 
                                                             <td className="p-5 text-center align-middle">
                                                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                                                                    <Eye size={14} /> {0}
+                                                                    <Eye size={14} /> {serv.view_content_count}
                                                                 </span>
                                                             </td>
 
                                                             <td className="p-5 text-center align-middle">
                                                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                                                    <MousePointerClick size={14} /> {0}
+                                                                    <MousePointerClick size={14} /> {serv.contact_whatsapp_count}
                                                                 </span>
                                                             </td>
 
