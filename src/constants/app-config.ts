@@ -4,7 +4,7 @@ export const APP_CONFIG = {
     appKeywords: 'Vereador',
     view: 'https://preciseichamei.com.br/api/v1',
     api: {
-        development: 'https://preciseichamei.com.br/api/v1',
-        production: 'https://preciseichamei.com.br/api/v1',
+        development: 'https://api.preciseichamei.com.br/api/v1',
+        production: 'https://api.preciseichamei.com.br/api/v1',
     },
 }
