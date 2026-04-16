@@ -2,9 +2,9 @@ export const APP_CONFIG = {
     appName: 'Vereador',
     appDescription: 'Vereador',
     appKeywords: 'Vereador',
-    view: 'http://localhost:4000/api/v1',
+    view: 'https://preciseichamei.com.br/api/v1',
     api: {
-        development: 'http://localhost:4000/api/v1',
-        production: 'http://localhost:4000/api/v1',
+        development: 'https://preciseichamei.com.br/api/v1',
+        production: 'https://preciseichamei.com.br/api/v1',
     },
 }
