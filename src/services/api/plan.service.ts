@@ -3,7 +3,7 @@ import { fnFetch } from "@/utils/functions/fnFetch";
 import { AnswerDTO } from "../dto";
 import { HttpService } from "./http.service";
 import { AuthResponse } from "@/@types/auth";
-
+ 
 export class PlansService extends HttpService {
 
     constructor() {
