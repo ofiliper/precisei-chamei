@@ -184,8 +184,8 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
             id_subcategory: selectedSubcategory?.id,
             whatsapp: service.data.whatsapp, // INCLUÍDO AQUI
             content: {
-                content: service.data.content.content,
-                social_media: service.data.content.social_media,
+                content: service.data.content?.content,
+                social_media: service.data.content?.social_media,
             },
             address: service.data.address,
             gallery: service.data.gallery,
@@ -502,29 +502,31 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
                             </motion.button>
 
                             <AnimatePresence>
-                                {service.data.gallery.map((url, idx) => (
-                                    <motion.div
-                                        key={`${url}-${idx}`}
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        whileHover={{ y: -5 }}
-                                        className="relative group aspect-square rounded-2xl overflow-hidden shadow-sm bg-gray-100 border border-gray-100"
-                                    >
-                                        <img src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${workspace.data.id}/${url}`} className="w-full h-full object-cover" alt={`Galeria ${idx}`} />
-                                        <motion.button
-                                            onClick={() => {
-                                                const newData = [...service.data.gallery];
-                                                newData.splice(idx, 1);
-                                                service.fnOnChange("gallery", newData);
-                                            }}
-                                            whileHover={{ scale: 1.1 }}
-                                            className="absolute top-2 right-2 p-2 bg-white/90 text-rose-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-white"
+                                {
+                                    service.data?.gallery &&
+                                    service.data?.gallery.map((url, idx) => (
+                                        <motion.div
+                                            key={`${url}-${idx}`}
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.8 }}
+                                            whileHover={{ y: -5 }}
+                                            className="relative group aspect-square rounded-2xl overflow-hidden shadow-sm bg-gray-100 border border-gray-100"
                                         >
-                                            <Trash2 size={16} />
-                                        </motion.button>
-                                    </motion.div>
-                                ))}
+                                            <img src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${workspace.data.id}/${url}`} className="w-full h-full object-cover" alt={`Galeria ${idx}`} />
+                                            <motion.button
+                                                onClick={() => {
+                                                    const newData = [...service.data.gallery];
+                                                    newData.splice(idx, 1);
+                                                    service.fnOnChange("gallery", newData);
+                                                }}
+                                                whileHover={{ scale: 1.1 }}
+                                                className="absolute top-2 right-2 p-2 bg-white/90 text-rose-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-white"
+                                            >
+                                                <Trash2 size={16} />
+                                            </motion.button>
+                                        </motion.div>
+                                    ))}
                             </AnimatePresence>
                         </div>
                     </motion.div>
@@ -651,9 +653,19 @@ function GalleryModal({ onClose, context }: { onClose: () => void, context: stri
                                     return;
                                 };
                                 if (context === 'GALLERY') {
-                                    // Dupla verificação no modal, embora o botão principal já esteja desabilitado
-                                    if (service.data.gallery.length < 5) {
-                                        service.fnOnChange("gallery", [...service.data.gallery, img.path]);
+                                    if (
+                                        service.data.gallery &&
+                                        service.data.gallery.length < 5) {
+                                        service.fnOnChange("gallery",
+                                            [
+                                                ...service.data.gallery,
+                                                img.path
+                                            ]);
+                                    } else {
+                                        service.fnOnChange("gallery",
+                                            [
+                                                img.path
+                                            ]);
                                     }
                                     onClose();
                                     return;

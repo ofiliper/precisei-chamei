@@ -139,8 +139,8 @@ function SearchContent() {
                                     key={pageNum}
                                     onClick={() => handlePageChange(pageNum)}
                                     className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-sm font-medium transition ${meta.page === pageNum
-                                            ? 'bg-emerald-500 text-white shadow-md'
-                                            : 'border border-gray-50 text-slate-500 hover:bg-gray-50'
+                                        ? 'bg-emerald-500 text-white shadow-md'
+                                        : 'border border-gray-50 text-slate-500 hover:bg-gray-50'
                                         }`}
                                 >
                                     {pageNum}

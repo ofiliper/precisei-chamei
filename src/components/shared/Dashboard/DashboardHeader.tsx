@@ -122,7 +122,7 @@ export default function DashboardHeader({
                         </a>
 
                         {/* --- NOVA OPÇÃO: TROCAR WORKSPACE --- */}
-                        <button
+                        {/* <button
                             onClick={() => {
                                 setIsUserDropdownOpen(false);
                                 onSwitchWorkspace();
@@ -131,7 +131,7 @@ export default function DashboardHeader({
                         >
                             <RefreshCcw size={16} />
                             Trocar Workspace
-                        </button>
+                        </button> */}
 
                         <div className="h-px bg-gray-100 my-1 mx-4" />
 

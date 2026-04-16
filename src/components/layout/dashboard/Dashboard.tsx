@@ -90,7 +90,7 @@ export default function DashboardLayout() {
                                 </motion.p>
                             </div>
                             <motion.a
-                                href="/dashboard/servicos"
+                                href="/dashboard/assinar"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="bg-gradient-to-r from-[#2080B3] to-[#40A56A] text-white px-6 py-3 rounded-lg font-medium text-sm shadow-md w-full sm:w-auto mt-4 sm:mt-0 flex items-center justify-center"
@@ -180,13 +180,14 @@ export default function DashboardLayout() {
                                                                         whileHover={{ scale: 1.05 }}
                                                                         whileTap={{ scale: 0.95 }}
                                                                         href={`/dashboard/servicos/${serv.id}`}
-                                                                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                                        className="flex justify-between items-center gap-2 p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                                                                         title="Editar"
                                                                     >
                                                                         <Edit3 size={18} strokeWidth={2} />
+                                                                        Editar
                                                                     </motion.a>
 
-                                                                    <motion.button
+                                                                    {/* <motion.button
                                                                         whileHover={{ scale: 1.05 }}
                                                                         whileTap={{ scale: 0.95 }}
                                                                         onClick={() => {
@@ -197,7 +198,7 @@ export default function DashboardLayout() {
                                                                         title="Excluir"
                                                                     >
                                                                         <Trash2 size={18} strokeWidth={2} />
-                                                                    </motion.button>
+                                                                    </motion.button> */}
                                                                 </div>
                                                             </td>
                                                         </tr>
