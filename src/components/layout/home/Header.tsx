@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, MapPin, Loader2, Search, Navigation, ChevronDown, ChevronUp } from "lucide-react";
 import usePublicServices from "@/hooks/usePublicServices";
+import { APP_CONFIG } from "@/constants/app-config";
 
 export default function Header() {
 
@@ -157,7 +158,7 @@ export default function Header() {
                 const { latitude, longitude } = position.coords;
                 try {
                     const res = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/map?address=${latitude},${longitude}`
+                        `${APP_CONFIG.api.development}/map?address=${latitude},${longitude}`
                     );
                     const data = await res.json();
 
