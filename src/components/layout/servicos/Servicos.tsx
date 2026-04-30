@@ -77,6 +77,34 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
     const categoryList = useStore(categoryStore);
     const router = useRouter();
 
+    useEffect(() => {
+        if (!service.data) return;
+
+        let parsedContent: any = service.data.content;
+        let parsedGallery = service.data.gallery;
+
+        try {
+            if (typeof parsedContent === "string") {
+                parsedContent = JSON.parse(parsedContent);
+            }
+        } catch (e) {
+            console.warn("Erro ao parsear content");
+            parsedContent = {};
+        }
+
+        try {
+            if (typeof parsedGallery === "string") {
+                parsedGallery = JSON.parse(parsedGallery);
+            }
+        } catch (e) {
+            console.warn("Erro ao parsear gallery");
+            parsedGallery = [];
+        }
+
+        service.fnOnChange("content", parsedContent || {});
+        service.fnOnChange("gallery", parsedGallery || []);
+    }, [service.data.id]);
+
     // --- 1. Carregamento Inicial (Logic Core) ---
     useEffect(() => {
         const loadInitialData = async () => {
@@ -222,7 +250,15 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
     };
 
     // Verificação de Limite da Galeria
-    const isGalleryFull = (service.data.gallery?.length || 0) >= 5;
+    const gallery = Array.isArray(service.data?.gallery)
+        ? service.data.gallery
+        : typeof service.data?.gallery === "string"
+            ? [service.data.gallery]
+            : [];
+
+    const isGalleryFull = gallery.length >= 5;
+
+    console.log("Service Data:", service.data);
 
     return (
         <div
@@ -503,8 +539,9 @@ export default function Servicos({ action = 'create' }: { action?: string }) {
 
                             <AnimatePresence>
                                 {
-                                    service.data?.gallery &&
-                                    service.data?.gallery.map((url, idx) => (
+                                    Array.isArray(service.data?.gallery) &&
+                                    service.data.gallery.length > 0 &&
+                                    service.data.gallery.map((url, idx) => (
                                         <motion.div
                                             key={`${url}-${idx}`}
                                             initial={{ opacity: 0, scale: 0.8 }}
