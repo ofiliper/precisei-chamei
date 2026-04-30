@@ -9,6 +9,7 @@ import useCategory from "@/hooks/useCategory";
 import usePublicServices from "@/hooks/usePublicServices";
 import { useStore } from "zustand";
 import { publicServiceListStore } from "@/store/services/public-service-list.store";
+import { APP_CONFIG } from "@/constants/app-config";
 
 // Função utilitária para remover HTML da descrição
 const stripHtml = (html: string) => {
@@ -197,7 +198,7 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
             {/* Imagem do Card (ESTÁTICA, mantendo layout anterior) */}
             <div className={`w-full md:w-48 h-40 ${imageColor} rounded-lg flex-shrink-0 relative overflow-hidden`}>
                 <img
-                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${service.id_workspace}/${service.logo_image}`}
+                    src={`${APP_CONFIG.api.production}/${service.id_workspace}/${service.logo_image}`}
                     alt={service.name || "Imagem do serviço"}
                     className="w-full h-full object-cover"
                     onError={(e) => {

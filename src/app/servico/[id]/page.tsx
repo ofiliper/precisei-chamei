@@ -20,6 +20,7 @@ import usePublicServices from '@/hooks/usePublicServices';
 import { useParams } from 'next/navigation';
 import { publicServiceStore } from '@/store/services/public-service.store';
 import { useStore } from 'zustand';
+import { APP_CONFIG } from '@/constants/app-config';
 
 // Remove HTML
 const stripHtml = (html: string) => {
@@ -123,7 +124,7 @@ const App = () => {
             <div className="w-full h-64 md:h-80 relative bg-gray-300">
                 {service.cover_image ? (
                     <img
-                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${service.id_workspace}/${service.cover_image}`}
+                        src={`${APP_CONFIG.api.production}/${service.id_workspace}/${service.cover_image}`}
                         alt={`Capa ${service.name}`}
                         className="w-full h-full object-cover"
                     />
@@ -146,7 +147,7 @@ const App = () => {
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-white flex items-center justify-center">
                             {service.logo_image ? (
                                 <img
-                                    src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${service.id_workspace}/${service.logo_image}`}
+                                    src={`${APP_CONFIG.api.production}/${service.id_workspace}/${service.logo_image}`}
                                     alt={`Logo ${service.name}`}
                                     className="w-full h-full object-cover"
                                 />
@@ -211,7 +212,7 @@ const App = () => {
                             {parsedGallery.map((foto, index) => (
                                 <div key={index} className="flex-none w-72 md:w-80 h-56 rounded-lg overflow-hidden shadow-sm snap-start bg-gray-100">
                                     <img
-                                        src={`${process.env.NEXT_PUBLIC_UPLOAD_URL}/${service.id_workspace}/${foto}`}
+                                        src={`${APP_CONFIG.api.production}/${service.id_workspace}/${foto}`}
                                         alt={`Trabalho ${index + 1}`}
                                         className="w-full h-full object-cover hover:scale-105 transition duration-500"
                                     />
