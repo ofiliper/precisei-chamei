@@ -5,6 +5,7 @@ export const APP_CONFIG = {
     view: 'https://preciseichamei.com.br/api/v1',
     api: {
         development: 'https://api.preciseichamei.com.br/api/v1',
+        upload: 'https://api.preciseichamei.com.br/upload',
         production: 'https://api.preciseichamei.com.br/api/v1',
     },
     // view: 'http://localhost:4000/api/v1',

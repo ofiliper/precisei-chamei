@@ -198,7 +198,7 @@ function ServiceCard({ service, imageColor }: { service: any, imageColor: string
             {/* Imagem do Card (ESTÁTICA, mantendo layout anterior) */}
             <div className={`w-full md:w-48 h-40 ${imageColor} rounded-lg flex-shrink-0 relative overflow-hidden`}>
                 <img
-                    src={`${APP_CONFIG.api.production}/${service.id_workspace}/${service.logo_image}`}
+                    src={`${APP_CONFIG.api.upload}/${service.id_workspace}/${service.logo_image}`}
                     alt={service.name || "Imagem do serviço"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
